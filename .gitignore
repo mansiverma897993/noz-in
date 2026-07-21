@@ -1,0 +1,20 @@
+/bin/
+/dist/
+/out/
+/coverage/
+/coverage.out
+/deploy/**/pours/
+/deploy/**/secrets/
+# The destination casting is rendered per-host from casting.yaml.tmpl and carries
+# that host's private address, so it is local inventory. The reproducible judge
+# path is deploy/local/, whose casting.yaml and casting.yaml.lock are committed.
+/deploy/destination/casting.yaml
+*.coverprofile
+*.prof
+.DS_Store
+._*
+.env
+.env.*
+!.env.example
+/promcast
+/corpus-archive

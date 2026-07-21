@@ -1,0 +1,60 @@
+apiVersion: v1alpha1
+kind: Installation
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: docker
+    flavor: compose
+
+  signoz:
+    spec:
+      image: signoz/signoz:v0.133.0@sha256:588a8ea3deeab1a6a4cb42261607457c36eee6ffbb510184880f1f826be4b646
+      version: v0.133.0
+
+  ingester:
+    spec:
+      image: signoz/signoz-otel-collector:v0.144.6@sha256:7e4e539a73f1f88fbc1cd7e659ab3950908e83ce1f2a37a297452f910d072174
+      version: v0.144.6
+      config:
+        data:
+          # Deep-merged over Foundry's generated ingester.yaml. Maps merge, but
+          # lists are replaced wholesale, so the metrics receiver list below
+          # restates otlp alongside prometheus rather than appending to it.
+          ingester.yaml: |
+            receivers:
+              prometheus:
+                config:
+                  scrape_configs:
+                    - job_name: node-exporter
+                      scrape_interval: 15s
+                      static_configs:
+                        - targets: ["node-exporter:9100"]
+                          labels:
+                            instance: local-node
+            service:
+              pipelines:
+                metrics:
+                  receivers:
+                    - otlp
+                    - prometheus
+
+  # node_exporter is not one of Foundry's moldings, so it joins the generated
+  # compose project as a patch. Sharing signoz-network lets the collector reach
+  # it by container name, which keeps this file portable across machines.
+  patches:
+    - target: "deployment/compose.yaml"
+      operations:
+        - op: add
+          path: /services/node-exporter
+          value:
+            image: prom/node-exporter:v1.11.1@sha256:e9cff4fc67b1818f8c97adb115b9f12c9a54b533de86765d4a0effc01b357205
+            container_name: signoz-node-exporter
+            command:
+              - --path.rootfs=/host
+            pid: host
+            volumes:
+              - "/:/host:ro"
+            networks:
+              - signoz-network
+            restart: unless-stopped

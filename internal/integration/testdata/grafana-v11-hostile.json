@@ -1,0 +1,254 @@
+{
+  "title": "Grafana 11 hostile semantics",
+  "description": "Combined adversarial Grafana 10/11 migration fixture",
+  "uid": "grafana-v11-hostile",
+  "schemaVersion": 41,
+  "tags": ["migration", "hostile-fixture"],
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["5s", "30s", "1m"]
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "Deployments",
+        "expr": "changes(deployments_total[5m])",
+        "datasource": {"type": "prometheus", "uid": "prom"}
+      }
+    ]
+  },
+  "links": [
+    {"title": "Runbook", "url": "https://example.invalid/runbook"}
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "cluster",
+        "label": "Cluster",
+        "type": "custom",
+        "query": "prod,stage",
+        "current": {"text": "prod", "value": "prod"}
+      },
+      {
+        "name": "job",
+        "label": "Job",
+        "type": "query",
+        "query": {"query": "label_values(up{cluster=\"$cluster\"}, job)", "refId": "VariableQuery"},
+        "regex": "/api-.*/",
+        "current": {"text": "api", "value": "api"},
+        "hide": 0,
+        "refresh": 2,
+        "sort": 1,
+        "skipUrlSync": false,
+        "options": [{"text": "api", "value": "api", "selected": true}]
+      },
+      {
+        "name": "hosts",
+        "label": "Hosts",
+        "type": "query",
+        "query": "label_values(up, instance)",
+        "multi": true,
+        "current": {"text": ["host-a", "host-b"], "value": ["host-a", "host-b"]}
+      },
+      {
+        "name": "all_hosts",
+        "label": "All hosts",
+        "type": "query",
+        "query": "label_values(up, instance)",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {"text": "All", "value": ["$__all"]}
+      },
+      {
+        "name": "custom_all",
+        "label": "Custom All",
+        "type": "query",
+        "query": "label_values(up, instance)",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".+",
+        "current": {"text": "All", "value": ["$__all"]}
+      },
+      {
+        "name": "unset_all",
+        "label": "Unset All",
+        "type": "query",
+        "query": "label_values(up, instance)",
+        "multi": true,
+        "includeAll": true
+      },
+      {
+        "name": "missing_current",
+        "label": "Missing current",
+        "type": "textbox"
+      },
+      {
+        "name": "window",
+        "label": "Window",
+        "type": "interval",
+        "query": "1m,5m,15m",
+        "current": {"text": "5m", "value": "5m"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Modifiers and windows",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "transparent": false,
+      "links": [{"title": "Panel runbook", "url": "https://example.invalid/panel"}],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "custom": {"drawStyle": "line", "lineWidth": 2}
+        },
+        "overrides": [{"matcher": {"id": "byName", "options": "A"}, "properties": []}]
+      },
+      "options": {"legend": {"displayMode": "table", "placement": "bottom"}},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_requests_total{job=\"$job\"}[5m] offset 1h))",
+          "legendFormat": "offset {{job}}"
+        },
+        {
+          "refId": "B",
+          "expr": "up @ 1700000000"
+        },
+        {
+          "refId": "C",
+          "expr": "sum(rate(http_requests_total[$__rate_interval]))",
+          "step": "30",
+          "range": true,
+          "exemplar": false
+        },
+        {
+          "refId": "D",
+          "expr": "sum(rate(http_requests_total[$window]))",
+          "interval": "2m",
+          "intervalFactor": 2,
+          "maxDataPoints": 120
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Operators, names, and anchors",
+      "type": "timeseries",
+      "gridPos": {"x": 6, "y": 0, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {"refId": "A", "expr": "sum(up) ^ 2"},
+        {"refId": "A", "expr": "{__name__=\"up\"}"},
+        {"refId": "", "expr": "{__name__=~\"http_.*\"}"},
+        {"refId": "D", "expr": "up{instance=~\"api$\"}"},
+        {"refId": "E", "expr": "up{job=~\"$job\"}"}
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Variable grammar",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 8, "w": 24, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {"refId": "A", "expr": "up{job=\"${job}\"}"},
+        {"refId": "B", "expr": "up{instance=~\"[[hosts]]\"}"},
+        {"refId": "C", "expr": "up{job=~\"${job:regex}\"}"},
+        {"refId": "D", "expr": "up{job=~\"${job:pipe}\"}"},
+        {"refId": "E", "expr": "up{job=\"${job:csv}\"}", "hide": true},
+        {"refId": "F", "expr": "label_replace(up, \"copy\", \"${1}\", \"instance\", \"(.*)\")"},
+        {"refId": "G", "expr": "up{instance=~\"$all_hosts\"}"}
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Grafana expression result",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+      "targets": [
+        {"refId": "A", "expr": "sum(errors_total)", "hide": true, "datasource": {"type": "prometheus", "uid": "prom"}},
+        {"refId": "B", "expr": "sum(requests_total)", "hide": true, "datasource": {"type": "prometheus", "uid": "prom"}},
+        {"refId": "C", "type": "math", "expression": "$A / $B", "datasource": {"type": "__expr__", "uid": "__expr__"}},
+        {"refId": "D", "expr": "up{job=\"$missing_current\"}", "hide": true, "datasource": {"type": "prometheus", "uid": "prom"}},
+        {"refId": "E", "expr": "up{instance=~\"$unset_all\"}", "hide": true, "datasource": {"type": "prometheus", "uid": "prom"}}
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Target knobs",
+      "type": "timeseries",
+      "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prom"},
+      "targets": [
+        {"refId": "A", "expr": "sum(up)", "instant": true, "hide": true},
+        {"refId": "B", "expr": "sum(up)", "format": "table", "step": 45, "range": false, "exemplar": true, "editorMode": "code"},
+        {"refId": "C", "expr": "", "hide": true, "range": true}
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Empty visualization",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 24, "w": 6, "h": 6},
+      "targets": []
+    },
+    {
+      "id": 7,
+      "title": "External library panel",
+      "type": "timeseries",
+      "gridPos": {"x": 6, "y": 24, "w": 6, "h": 6},
+      "libraryPanel": {"uid": "external-library-model", "name": "Shared latency"},
+      "targets": [{"refId": "A", "expr": "up"}]
+    },
+    {
+      "id": 8,
+      "title": "Runbook text",
+      "type": "text",
+      "gridPos": {"x": 12, "y": 24, "w": 6, "h": 6},
+      "options": {"content": "Check the runbook before paging."},
+      "targets": []
+    },
+    {
+      "id": 9,
+      "title": "Unknown plugin",
+      "type": "vendor-hostile-panel",
+      "gridPos": {"x": 18, "y": 24, "w": 6, "h": 6},
+      "transparent": false,
+      "targets": [{"refId": "A", "expr": "up"}]
+    },
+    {
+      "id": 10,
+      "title": "Collapsed service row",
+      "type": "row",
+      "collapsed": true,
+      "gridPos": {"x": 0, "y": 30, "w": 24, "h": 1},
+      "panels": [
+        {
+          "id": 11,
+          "title": "Nested availability",
+          "type": "timeseries",
+          "gridPos": {"x": 0, "y": 31, "w": 18, "h": 6},
+          "targets": [{"refId": "A", "expr": "sum(up{job=\"$job\"})"}]
+        },
+        {
+          "id": 12,
+          "title": "Nested request rate",
+          "type": "timeseries",
+          "gridPos": {"x": 8, "y": 31, "w": 18, "h": 6},
+          "targets": [{"refId": "A", "expr": "sum(rate(http_requests_total[5m]))"}]
+        }
+      ]
+    }
+  ]
+}

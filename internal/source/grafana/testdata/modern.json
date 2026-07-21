@@ -1,0 +1,56 @@
+{
+  "title": "Service overview",
+  "uid": "service-overview",
+  "schemaVersion": 41,
+  "tags": ["prometheus"],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "prometheus"
+      },
+      {
+        "name": "job",
+        "label": "Job",
+        "type": "query",
+        "query": {"query": "label_values(up, job)", "refId": "variable"},
+        "current": {"value": ["api", "worker"]},
+        "multi": true,
+        "includeAll": true,
+        "datasource": {"type": "prometheus", "uid": "${datasource}"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Availability",
+      "type": "timeseries",
+      "fieldConfig": {"defaults": {"unit": "percentunit"}},
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"refId": "A", "expr": "sum(up{job=~\"$job\"})", "legendFormat": "{{job}}"},
+        {"refId": "B", "expr": "", "hide": true}
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Collapsed details",
+      "type": "row",
+      "collapsed": true,
+      "gridPos": {"x": 0, "y": 8, "w": 24, "h": 1},
+      "panels": [
+        {
+          "id": 3,
+          "title": "Request rate",
+          "type": "stat",
+          "gridPos": {"x": 0, "y": 9, "w": 6, "h": 4},
+          "targets": [{"refId": "A", "expr": "rate(http_requests_total[5m])"}]
+        }
+      ]
+    }
+  ]
+}

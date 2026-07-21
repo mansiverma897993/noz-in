@@ -1,0 +1,46 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - depguard
+    - errcheck
+    - forbidigo
+    - gocyclo
+    - godot
+    - govet
+    - iface
+    - ineffassign
+    - misspell
+    - modernize
+    - nilnil
+    - sloglint
+    - staticcheck
+    - unparam
+    - unused
+    - wastedassign
+  settings:
+    depguard:
+      rules:
+        model-purity:
+          files:
+            - "**/internal/model/**"
+          deny:
+            - pkg: github.com/mansiverma897993/signoz/internal/source
+              desc: the neutral model must not depend on source adapters
+            - pkg: github.com/mansiverma897993/signoz/internal/target
+              desc: the neutral model must not depend on target adapters
+    iface:
+      enable:
+        - identical
+    forbidigo:
+      forbid:
+        - pattern: ^(fmt\.Print.*|print|println|panic)$
+    sloglint:
+      attr-only: true
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

@@ -1,0 +1,48 @@
+apiVersion: v1alpha1
+kind: Installation
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: docker
+    flavor: compose
+  signoz:
+    spec:
+      image: signoz/signoz:v0.133.0@sha256:588a8ea3deeab1a6a4cb42261607457c36eee6ffbb510184880f1f826be4b646
+      version: v0.133.0
+  ingester:
+    spec:
+      image: signoz/signoz-otel-collector:v0.144.6@sha256:7e4e539a73f1f88fbc1cd7e659ab3950908e83ce1f2a37a297452f910d072174
+      version: v0.144.6
+      config:
+        data:
+          ingester.yaml: |
+            receivers:
+              prometheus:
+                config:
+                  scrape_configs:
+                    - job_name: node-exporter
+                      scrape_interval: 60s
+                      static_configs:
+                        - targets: ["__SOURCE_PRIVATE_IP__:9100"]
+                          labels:
+                            instance: source-node
+                    - job_name: prometheus
+                      scrape_interval: 60s
+                      static_configs:
+                        - targets: ["__SOURCE_PRIVATE_IP__:9090"]
+                    - job_name: source-prometheus-recording-rules
+                      scrape_interval: 60s
+                      honor_labels: true
+                      metrics_path: /federate
+                      params:
+                        match[]:
+                          - '{__name__=~".+:.+"}'
+                      static_configs:
+                        - targets: ["__SOURCE_PRIVATE_IP__:9090"]
+            service:
+              pipelines:
+                metrics:
+                  receivers:
+                    - otlp
+                    - prometheus

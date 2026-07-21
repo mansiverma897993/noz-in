@@ -1,0 +1,15 @@
+.git
+.github
+bin
+dist
+out
+coverage
+coverage.out
+deploy
+docs
+**/testdata
+**/*_test.go
+*.coverprofile
+*.md
+LICENSE
+NOTICE

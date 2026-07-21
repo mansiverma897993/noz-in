@@ -1,0 +1,12 @@
+groups:
+  - name: node
+    rules:
+      - alert: NodeDown
+        expr: up{job="node-exporter"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Node exporter is down.
+      - record: job:up:sum
+        expr: sum by (job) (up)

@@ -1,0 +1,7 @@
+{
+  "name": "promcast-assist",
+  "version": "0.1.0",
+  "description": "Agent skill that assists Grafana-to-SigNoz migration by driving the deterministic promcast CLI, proposing SigNoz Builder queries for the residual, and verifying every proposal live before adoption.",
+  "license": "Apache-2.0",
+  "skills": ["."]
+}

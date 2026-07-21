@@ -1,0 +1,11 @@
+promcast
+Copyright 2026 Mansi Verma
+
+This product includes software developed by its contributors and third-party
+dependencies listed in go.mod. SigNoz is a trademark of SigNoz, Inc. This
+independent project is not affiliated with or endorsed by SigNoz, Inc.
+
+The UI-authored Grafana audit corpus includes dashboard JSON from the
+OpenTelemetry Demo, Copyright The OpenTelemetry Authors, under Apache-2.0.
+Immutable source and license links are recorded in
+docs/ui-authored-grafana-corpus.md and the adjacent fixture manifest.

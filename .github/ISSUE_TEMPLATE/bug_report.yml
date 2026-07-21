@@ -1,0 +1,52 @@
+name: Bug report
+description: A migration produced wrong output, crashed, or made a claim its evidence does not support
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The fastest path to a fix is the evidence report —
+        `out/<name>.report.json` records every decision the tool made, and
+        redacting metric names/labels from it is fine.
+  - type: input
+    id: version
+    attributes:
+      label: promcast version
+      description: Output of `promcast version`
+    validations:
+      required: true
+  - type: input
+    id: signoz-version
+    attributes:
+      label: SigNoz version
+      description: The target SigNoz release (if a live target was involved)
+  - type: textarea
+    id: command
+    attributes:
+      label: Exact command
+      description: The full command line (redact URLs/keys), and its exit code
+      render: sh
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected vs what happened
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: |
+        Attach or paste the relevant part of `out/<name>.report.json` — the
+        affected query's `verdict`, `reasonCodes`, `original`, and (if present)
+        `builder`/`formula`. For a wrong-values claim, include the source PromQL
+        and what each side returned. Redact anything sensitive.
+  - type: textarea
+    id: input
+    attributes:
+      label: Minimal input
+      description: |
+        A minimal dashboard JSON or rule YAML that reproduces the issue, if you
+        can share one. A single panel/rule is ideal.

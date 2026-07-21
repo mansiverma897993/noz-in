@@ -1,0 +1,28 @@
+{
+  "title": "Legacy overview",
+  "schemaVersion": 14,
+  "templating": {"list": []},
+  "rows": [
+    {
+      "title": "Headlines",
+      "collapse": false,
+      "panels": [
+        {
+          "id": 10,
+          "title": "Pending",
+          "type": "singlestat",
+          "span": 6,
+          "datasource": "$datasource",
+          "targets": [{"refId": "A", "expr": "sum(pending_requests)"}]
+        },
+        {
+          "id": 11,
+          "title": "Queue",
+          "type": "graph",
+          "span": 12,
+          "targets": [{"refId": "A", "expr": "queue_depth"}]
+        }
+      ]
+    }
+  ]
+}

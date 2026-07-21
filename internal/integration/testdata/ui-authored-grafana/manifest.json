@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "name": "otel-demo-grafana-10.1-demo",
+      "distribution": "vendored",
+      "file": "otel-demo-grafana-10.1-demo.json",
+      "upstreamRepository": "https://github.com/open-telemetry/opentelemetry-demo",
+      "upstreamCommit": "fc01d8f46f9d2a1cac6a4e674662fbfe8b66f3c4",
+      "upstreamPath": "src/grafana/provisioning/dashboards/demo/demo-dashboard.json",
+      "upstreamURL": "https://raw.githubusercontent.com/open-telemetry/opentelemetry-demo/fc01d8f46f9d2a1cac6a4e674662fbfe8b66f3c4/src/grafana/provisioning/dashboards/demo/demo-dashboard.json",
+      "upstreamSHA256": "9a68502bc797fa5c99cbdd054621e51f1189f0898a0d7d21037b5e9141b5b062",
+      "vendoredSHA256": "ba5bd378f50985a0dbfe04e7df9fdfa3fe79e3c14ff3c153ba5f76921f8dfa99",
+      "normalization": "appended-final-newline",
+      "license": "Apache-2.0",
+      "licenseURL": "https://github.com/open-telemetry/opentelemetry-demo/blob/fc01d8f46f9d2a1cac6a4e674662fbfe8b66f3c4/LICENSE",
+      "grafanaVersion": "10.1.2",
+      "versionEvidenceURL": "https://github.com/open-telemetry/opentelemetry-demo/blob/fc01d8f46f9d2a1cac6a4e674662fbfe8b66f3c4/docker-compose.yml#L633-L647",
+      "expected": {
+        "title": "Demo Dashboard",
+        "schemaVersion": 38,
+        "panels": 8,
+        "queries": 11,
+        "variables": 1,
+        "sourceFeatures": 106
+      },
+      "features": ["annotations", "fieldConfig", "modern-variables", "rows", "transformations"]
+    },
+    {
+      "name": "otel-demo-grafana-11.5-demo",
+      "distribution": "vendored",
+      "file": "otel-demo-grafana-11.5-demo.json",
+      "upstreamRepository": "https://github.com/open-telemetry/opentelemetry-demo",
+      "upstreamCommit": "8072c5bd72e15b2b1787fae0d1c09defec3b4f13",
+      "upstreamPath": "src/grafana/provisioning/dashboards/demo/demo-dashboard.json",
+      "upstreamURL": "https://raw.githubusercontent.com/open-telemetry/opentelemetry-demo/8072c5bd72e15b2b1787fae0d1c09defec3b4f13/src/grafana/provisioning/dashboards/demo/demo-dashboard.json",
+      "upstreamSHA256": "f7943992fc39384024e77bf29e41433e4a458f81c5b763335c1ba3bb31a7a077",
+      "vendoredSHA256": "d9e2621922377c8c4e5867fc2967b5740a2504a57aca095df4be5ba531e2d18d",
+      "normalization": "appended-final-newline",
+      "license": "Apache-2.0",
+      "licenseURL": "https://github.com/open-telemetry/opentelemetry-demo/blob/8072c5bd72e15b2b1787fae0d1c09defec3b4f13/LICENSE",
+      "grafanaVersion": "11.5.2",
+      "versionEvidenceURL": "https://github.com/open-telemetry/opentelemetry-demo/blob/8072c5bd72e15b2b1787fae0d1c09defec3b4f13/.env#L16",
+      "expected": {
+        "title": "Demo Dashboard",
+        "schemaVersion": 40,
+        "panels": 15,
+        "queries": 11,
+        "variables": 1,
+        "sourceFeatures": 126
+      },
+      "features": ["annotations", "fieldConfig", "mixed-datasources", "modern-variables", "rows", "transformations"]
+    },
+    {
+      "name": "otel-demo-grafana-11.5-spanmetrics",
+      "distribution": "vendored",
+      "file": "otel-demo-grafana-11.5-spanmetrics.json",
+      "upstreamRepository": "https://github.com/open-telemetry/opentelemetry-demo",
+      "upstreamCommit": "8072c5bd72e15b2b1787fae0d1c09defec3b4f13",
+      "upstreamPath": "src/grafana/provisioning/dashboards/demo/spanmetrics-dashboard.json",
+      "upstreamURL": "https://raw.githubusercontent.com/open-telemetry/opentelemetry-demo/8072c5bd72e15b2b1787fae0d1c09defec3b4f13/src/grafana/provisioning/dashboards/demo/spanmetrics-dashboard.json",
+      "upstreamSHA256": "d61bcf3538de4e9c4ada8a65c274dd85470e614bd59748de30beed7cbcd0262c",
+      "vendoredSHA256": "e676ebf27c2cc415052d80730c8a7c045d6843a7ce0c86285b6cdeaef898c7c4",
+      "normalization": "appended-final-newline",
+      "license": "Apache-2.0",
+      "licenseURL": "https://github.com/open-telemetry/opentelemetry-demo/blob/8072c5bd72e15b2b1787fae0d1c09defec3b4f13/LICENSE",
+      "grafanaVersion": "11.5.2",
+      "versionEvidenceURL": "https://github.com/open-telemetry/opentelemetry-demo/blob/8072c5bd72e15b2b1787fae0d1c09defec3b4f13/.env#L16",
+      "expected": {
+        "title": "Spanmetrics Demo Dashboard",
+        "schemaVersion": 40,
+        "panels": 11,
+        "queries": 14,
+        "variables": 2,
+        "sourceFeatures": 173
+      },
+      "features": ["all-value", "annotations", "fieldConfig", "modern-variables", "multi-value", "query-formats", "rows", "transformations"]
+    },
+    {
+      "name": "grafana-11.6-elasticsearch-expressions",
+      "distribution": "fetch-only",
+      "upstreamRepository": "https://github.com/grafana/grafana",
+      "upstreamCommit": "a26b9d592b2d3309834ae1e59f061fe4d10508f2",
+      "upstreamPath": "devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_migration.json",
+      "upstreamURL": "https://raw.githubusercontent.com/grafana/grafana/a26b9d592b2d3309834ae1e59f061fe4d10508f2/devenv/dev-dashboards/datasource-elasticsearch/elasticsearch_migration.json",
+      "upstreamSHA256": "65ed8e1b80e8b9852be76eb855c0d903ee4fa36c6b645a20548a94839c62e99c",
+      "normalization": "none",
+      "license": "AGPL-3.0-only",
+      "licenseURL": "https://github.com/grafana/grafana/blob/a26b9d592b2d3309834ae1e59f061fe4d10508f2/LICENSE",
+      "grafanaVersion": "11.6.16",
+      "versionEvidenceURL": "https://github.com/grafana/grafana/releases/tag/v11.6.16",
+      "expected": {
+        "title": "Datasource tests - Elasticsearch migration",
+        "schemaVersion": 38,
+        "panels": 96,
+        "queries": 124,
+        "variables": 0,
+        "sourceFeatures": 1022
+      },
+      "features": ["annotations", "expressions", "mixed-datasources", "rows", "transformations"]
+    },
+    {
+      "name": "grafana-11.6-library-panels",
+      "distribution": "fetch-only",
+      "upstreamRepository": "https://github.com/grafana/grafana",
+      "upstreamCommit": "a26b9d592b2d3309834ae1e59f061fe4d10508f2",
+      "upstreamPath": "devenv/dev-dashboards/panel-library/panel-library.json",
+      "upstreamURL": "https://raw.githubusercontent.com/grafana/grafana/a26b9d592b2d3309834ae1e59f061fe4d10508f2/devenv/dev-dashboards/panel-library/panel-library.json",
+      "upstreamSHA256": "12fe4eee3416d25f00afbb287861d725da438aca1a024f5fe3b657543f637975",
+      "normalization": "none",
+      "license": "AGPL-3.0-only",
+      "licenseURL": "https://github.com/grafana/grafana/blob/a26b9d592b2d3309834ae1e59f061fe4d10508f2/LICENSE",
+      "grafanaVersion": "11.6.16",
+      "versionEvidenceURL": "https://github.com/grafana/grafana/releases/tag/v11.6.16",
+      "expected": {
+        "title": "Panel - Panel Library",
+        "schemaVersion": 27,
+        "panels": 3,
+        "queries": 1,
+        "variables": 0,
+        "sourceFeatures": 59
+      },
+      "features": ["annotations", "library-panels"]
+    },
+    {
+      "name": "grafana-11.6-repeating-kitchen-sink",
+      "distribution": "fetch-only",
+      "upstreamRepository": "https://github.com/grafana/grafana",
+      "upstreamCommit": "a26b9d592b2d3309834ae1e59f061fe4d10508f2",
+      "upstreamPath": "devenv/dev-dashboards/e2e-repeats/Repeating-Kitchen-Sink.json",
+      "upstreamURL": "https://raw.githubusercontent.com/grafana/grafana/a26b9d592b2d3309834ae1e59f061fe4d10508f2/devenv/dev-dashboards/e2e-repeats/Repeating-Kitchen-Sink.json",
+      "upstreamSHA256": "d4d83a9a6e4530a2cc9588f01973da2f2fdd8426b6aa510b51e7776dbea0414a",
+      "normalization": "none",
+      "license": "AGPL-3.0-only",
+      "licenseURL": "https://github.com/grafana/grafana/blob/a26b9d592b2d3309834ae1e59f061fe4d10508f2/LICENSE",
+      "grafanaVersion": "11.6.16",
+      "versionEvidenceURL": "https://github.com/grafana/grafana/releases/tag/v11.6.16",
+      "expected": {
+        "title": "Repeating Kitchen Sink",
+        "schemaVersion": 34,
+        "panels": 5,
+        "queries": 0,
+        "variables": 3,
+        "sourceFeatures": 62
+      },
+      "features": ["annotations", "modern-variables", "repeats", "rows"]
+    },
+    {
+      "name": "grafana-11.6-dashboard-links",
+      "distribution": "fetch-only",
+      "upstreamRepository": "https://github.com/grafana/grafana",
+      "upstreamCommit": "a26b9d592b2d3309834ae1e59f061fe4d10508f2",
+      "upstreamPath": "devenv/dev-dashboards/feature-templating/templating-dashboard-links-and-variables.json",
+      "upstreamURL": "https://raw.githubusercontent.com/grafana/grafana/a26b9d592b2d3309834ae1e59f061fe4d10508f2/devenv/dev-dashboards/feature-templating/templating-dashboard-links-and-variables.json",
+      "upstreamSHA256": "41e679a9efefc31360e8fd09340bae45fc972d0f17429265cabdbb09dbe8cec9",
+      "normalization": "none",
+      "license": "AGPL-3.0-only",
+      "licenseURL": "https://github.com/grafana/grafana/blob/a26b9d592b2d3309834ae1e59f061fe4d10508f2/LICENSE",
+      "grafanaVersion": "11.6.16",
+      "versionEvidenceURL": "https://github.com/grafana/grafana/releases/tag/v11.6.16",
+      "expected": {
+        "title": "Templating - Dashboard Links and Variables",
+        "schemaVersion": 26,
+        "panels": 1,
+        "queries": 1,
+        "variables": 1,
+        "sourceFeatures": 23
+      },
+      "features": ["annotations", "dashboard-links", "modern-variables"]
+    }
+  ]
+}

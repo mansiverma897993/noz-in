@@ -1,0 +1,29 @@
+name: Feature request
+description: A source shape that should convert, a missing target capability, or a workflow gap
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The migration problem
+      description: |
+        What are you migrating, and what does the tool currently do with it?
+        If a query stays passthrough/needs_review that you believe could be
+        native, include the source PromQL and the reason codes from the report.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: |
+        What should happen instead? Note the project's invariant: nothing is
+        emitted natively without passing the live differential, so proposals
+        for new native conversions should describe why equivalence is provable.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds tried
+      description: e.g. an `overrides.yaml` entry that verified, or the agent skill
