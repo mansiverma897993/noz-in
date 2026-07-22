@@ -305,10 +305,13 @@ func emitLayout(grid model.Grid, id string) Layout {
 	x := min(max((grid.X+1)/2, 0), 11)
 	right := min(max((grid.X+grid.W+1)/2, x+1), 12)
 	return Layout{
-		X:      x,
-		Y:      grid.Y,
-		W:      max(right-x, 1),
-		H:      max(grid.H, 1),
+		X: x,
+		Y: grid.Y,
+		W: max(right-x, 1),
+		// Grafana grid rows are 30px and SigNoz grid rows are ~45px, so the
+		// emitted height is rounded to two thirds to preserve the source
+		// dashboard's visual density.
+		H:      max((grid.H*2+1)/3, 1),
 		I:      id,
 		Moved:  false,
 		Static: false,
@@ -373,8 +376,7 @@ func emittedPanelType(migration model.Migration, panel model.Panel) string {
 	if panel.Kind == model.PanelKindHistogram || panel.Kind == model.PanelKindBar {
 		return "graph"
 	}
-	if migration.PanelMode(panel) == model.TranslationPromQL &&
-		(panel.Kind == model.PanelKindTable || panel.Kind == model.PanelKindPie || panel.Kind == model.PanelKindValue) {
+	if migration.PanelMode(panel) == model.TranslationPromQL && panel.Kind == model.PanelKindTable {
 		return "graph"
 	}
 	return panelType(panel.Kind)

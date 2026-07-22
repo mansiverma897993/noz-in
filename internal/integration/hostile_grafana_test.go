@@ -87,7 +87,7 @@ func TestGrafanaV11HostileDashboardEndToEnd(t *testing.T) {
 	assertTranslation(t, migration, "/panels/1/targets/4", model.TranslationPromQL, model.ReasonRegexVariable)
 	assertTranslation(t, migration, "/panels/2/targets/4", model.TranslationNone, model.ReasonGrafanaVariableFormat)
 	assertTranslation(t, migration, "/panels/3/targets/2", model.TranslationNone, model.ReasonGrafanaExpression)
-	assertTranslation(t, migration, "/panels/4/targets/0", model.TranslationNone, model.ReasonInstantQuery)
+	assertTranslation(t, migration, "/panels/4/targets/0", model.TranslationPromQL, model.ReasonInstantQuery)
 	assertTranslation(t, migration, "/panels/4/targets/1", model.TranslationBuilder, model.ReasonGrafanaQueryFormat)
 	assertTranslation(t, migration, "/panels/4/targets/2", model.TranslationNone, model.ReasonEmptyExpression)
 	anchor := migration.Translations["/panels/1/targets/3"]

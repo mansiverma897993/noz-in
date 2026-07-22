@@ -100,23 +100,37 @@ func TestDashboardBuilderRequestMirrorsPinnedFrontendWire(t *testing.T) {
 func TestDashboardRequestMirrorsPinnedFrontendPanelRequestTypes(t *testing.T) {
 	t.Parallel()
 
+	// Builder widgets mirror the pinned frontend's per-panel request types.
+	// PromQL widgets always validate as time_series: SigNoz executes PromQL
+	// natively as a series query, and scalar reduction for value and pie
+	// widgets is a client-side rendering concern.
 	for _, test := range []struct {
 		panelType   string
+		queryType   string
 		requestType string
 	}{
-		{panelType: "graph", requestType: "time_series"},
-		{panelType: "bar", requestType: "time_series"},
-		{panelType: "histogram", requestType: "distribution"},
-		{panelType: "value", requestType: "scalar"},
-		{panelType: "table", requestType: "scalar"},
-		{panelType: "pie", requestType: "scalar"},
+		{panelType: "graph", queryType: "promql", requestType: "time_series"},
+		{panelType: "bar", queryType: "promql", requestType: "time_series"},
+		{panelType: "histogram", queryType: "promql", requestType: "time_series"},
+		{panelType: "value", queryType: "promql", requestType: "time_series"},
+		{panelType: "table", queryType: "promql", requestType: "time_series"},
+		{panelType: "pie", queryType: "promql", requestType: "time_series"},
+		{panelType: "graph", queryType: "builder", requestType: "time_series"},
+		{panelType: "histogram", queryType: "builder", requestType: "distribution"},
+		{panelType: "value", queryType: "builder", requestType: "scalar"},
+		{panelType: "table", queryType: "builder", requestType: "scalar"},
+		{panelType: "pie", queryType: "builder", requestType: "scalar"},
 	} {
-		t.Run(test.panelType, func(t *testing.T) {
+		t.Run(test.panelType+"_"+test.queryType, func(t *testing.T) {
 			t.Parallel()
-			widget := Widget{
-				PanelTypes: test.panelType,
-				Query:      WidgetQuery{QueryType: "promql", PromQL: []PromQLQuery{{Name: "A", Query: "up"}}},
+			query := WidgetQuery{QueryType: test.queryType, PromQL: []PromQLQuery{{Name: "A", Query: "up"}}}
+			if test.queryType == "builder" {
+				query = WidgetQuery{QueryType: "builder", Builder: BuilderContainer{QueryData: []BuilderQueryData{{
+					QueryName: "A", DataSource: "metrics", Expression: "A",
+					Aggregations: []MetricAggregation{{MetricName: "up", SpaceAggregation: "avg"}},
+				}}}}
 			}
+			widget := Widget{PanelTypes: test.panelType, Query: query}
 			request, err := DashboardRequestForWidgetWindow(widget, nil, time.Unix(300, 0), time.Minute)
 			require.NoError(t, err)
 			assert.Equal(t, test.requestType, request.RequestType)

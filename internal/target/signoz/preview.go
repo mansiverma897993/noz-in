@@ -232,7 +232,7 @@ func dashboardRequestForWidgetWindow(
 		SchemaVersion:  "v1",
 		Start:          uint64(start),
 		End:            uint64(end),
-		RequestType:    requestType(widget.PanelTypes),
+		RequestType:    requestType(widget.PanelTypes, widget.Query.QueryType),
 		CompositeQuery: CompositeQuery{Queries: queries},
 		FormatOptions: &FormatOptions{
 			FormatTableResultForUI: widget.PanelTypes == "table",
@@ -309,7 +309,14 @@ func DashboardVariableTypes(dashboard DashboardV5) map[string]string {
 	return result
 }
 
-func requestType(panelType string) string {
+func requestType(panelType, queryType string) string {
+	// SigNoz executes PromQL natively as a time-series query; the scalar
+	// reduction shown by value and pie widgets is a client-side rendering
+	// concern. Requesting time_series keeps preview, execution, and the exact
+	// differential on the same verified wire path for every PromQL query.
+	if queryType == "promql" {
+		return "time_series"
+	}
 	switch panelType {
 	case "value", "table", "pie":
 		return "scalar"

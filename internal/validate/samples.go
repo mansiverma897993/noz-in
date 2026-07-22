@@ -67,7 +67,7 @@ func downsamplePoints(points []reporttypes.SamplePoint, limit int) []reporttypes
 	}
 	sampled := make([]reporttypes.SamplePoint, 0, limit)
 	step := float64(len(points)-1) / float64(limit-1)
-	for index := 0; index < limit; index++ {
+	for index := range limit {
 		sampled = append(sampled, points[int(math.Round(float64(index)*step))])
 	}
 	return sampled

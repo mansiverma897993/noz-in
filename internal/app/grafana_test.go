@@ -1146,13 +1146,13 @@ func TestMigrateGrafanaSkipsMetadataForGuaranteedOmittedPanels(t *testing.T) {
 			{"title":"Valid","type":"timeseries","targets":[{"refId":"A","expr":"vector(1)"}]},
 			{"title":"Plugin","type":"vendor-unknown-panel","targets":[{"refId":"A","expr":"sum(aux_metric)"}]},
 			{"title":"Hidden only","type":"timeseries","targets":[{"refId":"A","expr":"sum(hidden_metric)","hide":true}]},
-			{"title":"Instant fatal","type":"timeseries","targets":[
-				{"refId":"A","expr":"sum(instant_metric)","instant":true},
-				{"refId":"B","expr":"sum(hidden_sibling)","hide":true}
+			{"title":"Instant passthrough","type":"timeseries","targets":[
+				{"refId":"A","expr":"vector(3)","instant":true},
+				{"refId":"B","expr":"vector(4)","hide":true}
 			]},
 			{"title":"Valid with dead hidden","type":"timeseries","targets":[
 				{"refId":"A","expr":"vector(2)"},
-				{"refId":"B","expr":"sum(hidden_instant_metric)","hide":true,"instant":true}
+				{"refId":"B","expr":"vector(5)","hide":true,"instant":true}
 			]}
 		]
 	}`), 0o600))
@@ -1167,12 +1167,14 @@ func TestMigrateGrafanaSkipsMetadataForGuaranteedOmittedPanels(t *testing.T) {
 
 	var dashboard signoz.DashboardV5
 	decodeFile(t, results[0].DashboardPath, &dashboard)
-	require.Len(t, dashboard.Widgets, 2)
+	require.Len(t, dashboard.Widgets, 3)
 	assert.Equal(t, "Valid", dashboard.Widgets[0].Title)
-	assert.Equal(t, "Valid with dead hidden", dashboard.Widgets[1].Title)
+	assert.Equal(t, "Instant passthrough", dashboard.Widgets[1].Title)
+	assert.Equal(t, "Valid with dead hidden", dashboard.Widgets[2].Title)
 	assert.Contains(t, results[0].Evidence.Panels[1].ReasonCodes, "PANEL_OMITTED")
 	assert.Contains(t, results[0].Evidence.Panels[2].ReasonCodes, "PANEL_OMITTED")
-	assert.Contains(t, results[0].Evidence.Panels[3].ReasonCodes, "PANEL_OMITTED")
+	assert.NotContains(t, results[0].Evidence.Panels[3].ReasonCodes, "PANEL_OMITTED")
+	assert.Contains(t, results[0].Evidence.Panels[3].ReasonCodes, "INSTANT_QUERY_UNSUPPORTED")
 	assert.NotContains(t, results[0].Evidence.Panels[4].ReasonCodes, "PANEL_OMITTED")
 }
 

@@ -184,7 +184,7 @@ var reasonDescriptions = map[ReasonCode]string{
 	ReasonAlertNameDisambiguated:         "A duplicate source alert name received a deterministic suffix.",
 	ReasonPanelTypeDowngrade:             "The visualization was changed to a graph because its SigNoz form cannot safely render PromQL.",
 	ReasonGrafanaExpression:              "The target is a Grafana expression rather than a Prometheus query.",
-	ReasonInstantQuery:                   "Grafana instant-query evaluation cannot be represented by the target dashboard query model.",
+	ReasonInstantQuery:                   "Grafana evaluated this query at a single instant; the migrated panel executes it as a range query and renders the latest sample, which review should confirm is acceptable for this expression.",
 	ReasonGrafanaIntervalControl:         "Grafana query interval controls were materialized into an explicit target step and require review.",
 	ReasonGrafanaQueryFormat:             "The Grafana query requests a non-default result format whose target shaping is not proven equivalent.",
 	ReasonGrafanaVariableFormat:          "A Grafana variable formatter has no proven executable SigNoz equivalent.",

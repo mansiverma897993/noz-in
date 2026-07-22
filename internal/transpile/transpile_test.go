@@ -893,14 +893,15 @@ func TestRewriteGrafanaGlobalSuffixesWithoutPrefixCorruption(t *testing.T) {
 	assert.Equal(t, []model.ReasonCode{model.ReasonRateIntervalRewrite}, reasons)
 }
 
-func TestAnalyzeQuarantinesInstantQuery(t *testing.T) {
+func TestAnalyzeEmitsInstantQueryAsReviewablePassthrough(t *testing.T) {
 	t.Parallel()
 
 	translation := NewAnalyzer(Options{}).Analyze(model.Query{
 		RefID: "A", Expression: "up", Instant: true,
 	})
 
-	assert.Equal(t, model.TranslationNone, translation.Kind)
+	assert.Equal(t, model.TranslationPromQL, translation.Kind)
+	assert.Equal(t, "up", translation.PromQL)
 	assert.Equal(t, model.VerdictNeedsReview, translation.Decision.Verdict)
 	assert.Contains(t, translation.Decision.Reasons, model.ReasonInstantQuery)
 }
@@ -1405,7 +1406,7 @@ func TestAnalyzeAccountsForQuerySourceFeaturesAcrossEarlyReturns(t *testing.T) {
 			reasons: []model.ReasonCode{model.ReasonBuilderLatestLookback, model.ReasonUnmappedQueryConfig},
 		},
 		{
-			name: "range false with instant", kind: model.TranslationNone,
+			name: "range false with instant", kind: model.TranslationPromQL,
 			query:   model.Query{RefID: "A", Expression: "sum(up)", Instant: true, SourceFeatures: []model.SourceFeature{rangeFeature}},
 			reasons: []model.ReasonCode{model.ReasonInstantQuery, model.ReasonUnmappedQueryConfig},
 		},

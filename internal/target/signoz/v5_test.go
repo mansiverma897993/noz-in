@@ -49,7 +49,7 @@ func TestEmitV5BuilderPanel(t *testing.T) {
 	assert.Equal(t, "v5", dashboard.Version)
 	assert.True(t, dashboard.UploadedGrafana)
 	assert.NotEmpty(t, dashboard.UUID)
-	assert.Equal(t, Layout{X: 1, Y: 3, W: 6, H: 7, I: dashboard.Widgets[0].ID}, withoutLayoutFlags(dashboard.Layout[0]))
+	assert.Equal(t, Layout{X: 1, Y: 3, W: 6, H: 5, I: dashboard.Widgets[0].ID}, withoutLayoutFlags(dashboard.Layout[0]))
 	assert.Equal(t, "builder", dashboard.Widgets[0].Query.QueryType)
 	assert.False(t, dashboard.Widgets[0].SpanGaps)
 	assert.Equal(t, "linear", dashboard.Widgets[0].LineInterpolation)
@@ -63,12 +63,20 @@ func TestEmitV5BuilderPanel(t *testing.T) {
 	assert.Empty(t, dashboard.Widgets[0].Query.Builder.QueryData[0].Aggregations[0].ReduceTo)
 }
 
-func TestEmitV5DowngradesUnsupportedPromQLVisualizationsToGraph(t *testing.T) {
+func TestEmitV5PromQLVisualizationMapping(t *testing.T) {
 	t.Parallel()
 
-	for _, kind := range []model.PanelKind{
-		model.PanelKindValue, model.PanelKindBar, model.PanelKindTable, model.PanelKindPie, model.PanelKindHistogram,
-	} {
+	// Value and pie panels keep their native SigNoz visualization on the
+	// PromQL path; bar, table, and histogram remain graph-downgraded because
+	// the pinned target renderings are not semantically usable for them.
+	expected := map[model.PanelKind]string{
+		model.PanelKindValue:     "value",
+		model.PanelKindPie:       "pie",
+		model.PanelKindBar:       "graph",
+		model.PanelKindTable:     "graph",
+		model.PanelKindHistogram: "graph",
+	}
+	for kind, want := range expected {
 		query := model.Query{RefID: "A", Expression: "up", SourcePath: "/panels/0/targets/0"}
 		migration := model.Migration{
 			Dashboard: model.Dashboard{Panels: []model.Panel{{
@@ -82,7 +90,7 @@ func TestEmitV5DowngradesUnsupportedPromQLVisualizationsToGraph(t *testing.T) {
 
 		dashboard := EmitV5(migration)
 		require.Len(t, dashboard.Widgets, 1, kind)
-		assert.Equal(t, "graph", dashboard.Widgets[0].PanelTypes, kind)
+		assert.Equal(t, want, dashboard.Widgets[0].PanelTypes, kind)
 	}
 }
 

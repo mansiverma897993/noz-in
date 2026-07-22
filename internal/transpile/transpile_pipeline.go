@@ -30,6 +30,17 @@ func (analyzer *Analyzer) analyze(query model.Query) model.Translation {
 	if translation, complete = analyzer.finishRiskAnalysis(context); complete {
 		return translation
 	}
+	if query.Instant {
+		// Grafana evaluates the expression at a single instant; the emitted
+		// dashboard executes the same expression as a range query and the
+		// value/pie visualization renders its latest sample. That is the
+		// standard current-value semantics for gauges, but it is not proven
+		// equivalence, so the query ships as reviewable passthrough and never
+		// becomes a Builder candidate.
+		passthrough, reasons := analyzer.rewriteAnalysis(context, context.prepared.dynamic)
+		return promQLTranslation(passthrough, model.VerdictNeedsReview,
+			append(reasons, model.ReasonInstantQuery))
+	}
 	if context, translation, complete = analyzer.tryFormula(context); complete {
 		return translation
 	}
@@ -183,8 +194,6 @@ func analysisExclusion(query model.Query) (model.ReasonCode, bool) {
 		return model.ReasonGrafanaExpression, true
 	case !isPrometheusDatasource(query.Datasource):
 		return model.ReasonNonPromDatasource, true
-	case query.Instant:
-		return model.ReasonInstantQuery, true
 	case strings.TrimSpace(query.Expression) == "":
 		return model.ReasonEmptyExpression, true
 	default:

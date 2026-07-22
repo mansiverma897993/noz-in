@@ -83,7 +83,7 @@ func (migration Migration) PanelDecision(panel Panel) Decision {
 		if decision.Verdict == VerdictNative {
 			decision.Verdict = VerdictPassthrough
 		}
-		if panel.Kind == PanelKindTable || panel.Kind == PanelKindPie || panel.Kind == PanelKindValue {
+		if panel.Kind == PanelKindTable {
 			addReview(ReasonPanelTypeDowngrade)
 		}
 	}
