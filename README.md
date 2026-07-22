@@ -32,6 +32,9 @@ The full contract — verdicts, fidelity bands, and what is deliberately not
 claimed — is in [docs/guarantees.md](docs/guarantees.md). How we know the gate
 is honest (an adversarial live audit that found and fixed a real temporal
 defect) is in [docs/deep-audit-findings.md](docs/deep-audit-findings.md).
+How the transpiler turns PromQL ASTs into Builder queries — and how the
+bundled agent skill layers on top of it for the most accurate conversion —
+is illustrated step by step in [docs/transpiler.md](docs/transpiler.md).
 
 ## What it handles
 
@@ -149,6 +152,8 @@ The `verify` command prints a fidelity band (`exact`, `within_1pct`,
 `phase_shift`, `diverged`, `series_mismatch`, or `no_data`. The bundled
 [Agent Skill](skills/promcast-assist/) drives this loop for any coding
 agent; the CLI remains the sole authority on whether a conversion is correct.
+The full propose → verify → adopt sequence is diagrammed in
+[docs/transpiler.md](docs/transpiler.md).
 
 ## Emit the SigNoz v6 (Perses) shape
 
