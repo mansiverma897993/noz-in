@@ -38,7 +38,10 @@ func TestClientQueryRangeSummarizesScalarAndSeriesResults(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, QueryExecutionResult{Rows: 1}, results["A"])
 	assert.True(t, results["A"].HasData())
-	assert.Equal(t, QueryExecutionResult{Series: 1, Points: 2}, results["B"])
+	assert.Equal(t, QueryExecutionResult{Series: 1, Points: 2, Sample: []MetricSeries{{
+		Labels: map[string]string{"service.name": "node"},
+		Values: []MetricPoint{{Timestamp: 1, Value: 2}, {Timestamp: 2, Value: 3}},
+	}}}, results["B"])
 }
 
 func TestClientQueryRangeReturnsSeries(t *testing.T) {

@@ -306,5 +306,20 @@ type Validation struct {
 	ReasonCodes       []string          `json:"reasonCodes,omitempty"`
 	PreviewStatements []json.RawMessage `json:"previewStatements,omitempty"`
 	PreviewWarnings   []json.RawMessage `json:"previewWarnings,omitempty"`
+	Samples           []SeriesSample    `json:"samples,omitempty"`
 	CheckedAt         string            `json:"checkedAt,omitempty"`
+}
+
+// SeriesSample is a bounded excerpt of one series the live target actually
+// returned during validation, retained so evidence reports can chart real
+// data. It is evidence of what executed, never an input to any verdict.
+type SeriesSample struct {
+	Labels string        `json:"labels,omitempty"`
+	Points []SamplePoint `json:"points"`
+}
+
+// SamplePoint is one finite sampled value with its epoch-millisecond timestamp.
+type SamplePoint struct {
+	Timestamp int64   `json:"t"`
+	Value     float64 `json:"v"`
 }

@@ -411,6 +411,7 @@ func applyExecutionResults(
 		validation.Series = execution.Series
 		validation.Points = execution.Points
 		validation.Rows = execution.Rows
+		validation.Samples = sampleSeries(execution.Sample)
 		validations[index] = validation
 	}
 	return validations, allExecuted

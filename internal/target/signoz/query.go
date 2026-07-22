@@ -13,7 +13,15 @@ type QueryExecutionResult struct {
 	Series int
 	Points int
 	Rows   int
+	// Sample retains up to executionSampleSeriesLimit of the returned series so
+	// evidence reports can chart the real data the live target served. Counts
+	// above always describe the full response, never the bounded sample.
+	Sample []MetricSeries
 }
+
+// executionSampleSeriesLimit bounds how many series QueryRange retains per
+// query for report charts; the summary counts remain exact regardless.
+const executionSampleSeriesLimit = 6
 
 // MetricPoint is one SigNoz metric sample.
 type MetricPoint struct {
@@ -121,11 +129,17 @@ func (client *Client) QueryRange(ctx context.Context, request QueryRangeRequest)
 		result.Series += len(raw.Series)
 		for _, series := range raw.Series {
 			result.Points += len(series.Values)
+			if len(result.Sample) < executionSampleSeriesLimit {
+				result.Sample = append(result.Sample, exportMetricSeries(series))
+			}
 		}
 		for _, aggregation := range raw.Aggregations {
 			result.Series += len(aggregation.Series)
 			for _, series := range aggregation.Series {
 				result.Points += len(series.Values)
+				if len(result.Sample) < executionSampleSeriesLimit {
+					result.Sample = append(result.Sample, exportMetricSeries(series))
+				}
 			}
 		}
 		results[raw.QueryName] = result

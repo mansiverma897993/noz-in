@@ -163,6 +163,7 @@ func validateRule(
 	validation.Series = execution.Series
 	validation.Points = execution.Points
 	validation.Rows = execution.Rows
+	validation.Samples = sampleSeries(execution.Sample)
 	return validation, true, nil
 }
 

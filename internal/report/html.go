@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"math"
 	"os"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/mansiverma897993/signoz/internal/safeoutput"
 	"github.com/mansiverma897993/signoz/pkg/reporttypes"
@@ -119,6 +121,7 @@ func DashboardHTMLBytes(evidence reporttypes.Report) ([]byte, error) {
 		"json":     prettyJSON,
 		"review":   func(verdict string) bool { return strings.EqualFold(verdict, "needs_review") },
 		"cmpstats": comparisonStats,
+		"spark":    sparkChart,
 	}).Parse(dashboardHTMLTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("parse dashboard report template: %w", err)
@@ -156,6 +159,115 @@ func comparisonStats(raw json.RawMessage) *comparisonView {
 	}
 	view.WithinTolerance = view.MaxRelativeErr <= 0.05
 	return &view
+}
+
+// sparkPalette cycles line colors for sampled series, mirroring the report's
+// verdict palette so charts read as part of the same system.
+var sparkPalette = []string{"#52d273", "#61a8ff", "#ff6b35", "#b48cff", "#4fd8cf", "#ff77a8"}
+
+// sparkChart renders the sampled series a query actually returned on the live
+// target as a self-contained inline SVG line chart with a legend. Everything
+// is generated from finite numeric data; label text is HTML-escaped.
+func sparkChart(samples []reporttypes.SeriesSample) template.HTML {
+	const (
+		width   = 640.0
+		height  = 150.0
+		left    = 52.0
+		right   = 634.0
+		top     = 10.0
+		bottom  = 126.0
+		timeRow = 144.0
+	)
+	minValue, maxValue := math.Inf(1), math.Inf(-1)
+	minTime, maxTime := int64(math.MaxInt64), int64(math.MinInt64)
+	total := 0
+	for _, series := range samples {
+		for _, point := range series.Points {
+			minValue = math.Min(minValue, point.Value)
+			maxValue = math.Max(maxValue, point.Value)
+			minTime = min(minTime, point.Timestamp)
+			maxTime = max(maxTime, point.Timestamp)
+			total++
+		}
+	}
+	if total < 2 || minTime == maxTime {
+		return ""
+	}
+	if maxValue == minValue {
+		pad := math.Max(math.Abs(maxValue)*0.1, 1)
+		maxValue += pad
+		minValue -= pad
+	}
+	scaleX := func(ts int64) float64 {
+		return left + (right-left)*float64(ts-minTime)/float64(maxTime-minTime)
+	}
+	scaleY := func(value float64) float64 {
+		return bottom - (bottom-top)*(value-minValue)/(maxValue-minValue)
+	}
+
+	var svg strings.Builder
+	fmt.Fprintf(&svg, `<svg viewBox="0 0 %.0f %.0f" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sampled series from the live target">`, width, height)
+	for _, fraction := range []float64{0, 0.5, 1} {
+		y := top + (bottom-top)*fraction
+		value := maxValue - (maxValue-minValue)*fraction
+		fmt.Fprintf(&svg, `<line x1="%.0f" y1="%.1f" x2="%.0f" y2="%.1f" stroke="#282e3b" stroke-width="1"/>`, left, y, right, y)
+		fmt.Fprintf(&svg, `<text x="%.0f" y="%.1f" fill="#9ca6b8" font-size="10" text-anchor="end">%s</text>`, left-6, y+3.5, formatSampleValue(value))
+	}
+	fmt.Fprintf(&svg, `<text x="%.0f" y="%.0f" fill="#9ca6b8" font-size="10">%s</text>`, left, timeRow, sampleTimeLabel(minTime))
+	fmt.Fprintf(&svg, `<text x="%.0f" y="%.0f" fill="#9ca6b8" font-size="10" text-anchor="end">%s</text>`, right, timeRow, sampleTimeLabel(maxTime))
+	for index, series := range samples {
+		if len(series.Points) == 0 {
+			continue
+		}
+		color := sparkPalette[index%len(sparkPalette)]
+		var points strings.Builder
+		for _, point := range series.Points {
+			fmt.Fprintf(&points, "%.1f,%.1f ", scaleX(point.Timestamp), scaleY(point.Value))
+		}
+		if len(series.Points) == 1 {
+			only := series.Points[0]
+			fmt.Fprintf(&svg, `<circle cx="%.1f" cy="%.1f" r="2.5" fill="%s"/>`, scaleX(only.Timestamp), scaleY(only.Value), color)
+			continue
+		}
+		fmt.Fprintf(&svg, `<polyline points="%s" fill="none" stroke="%s" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`, strings.TrimSpace(points.String()), color)
+	}
+	svg.WriteString(`</svg>`)
+
+	var legend strings.Builder
+	legend.WriteString(`<div class="chart-legend">`)
+	for index, series := range samples {
+		label := series.Labels
+		if label == "" {
+			label = fmt.Sprintf("series %d", index+1)
+		}
+		if len(label) > 64 {
+			label = label[:61] + "…"
+		}
+		fmt.Fprintf(&legend, `<span><i style="background:%s"></i>%s</span>`,
+			sparkPalette[index%len(sparkPalette)], template.HTMLEscapeString(label))
+	}
+	legend.WriteString(`</div>`)
+	return template.HTML(svg.String() + legend.String()) // #nosec G203 -- numeric data and escaped labels only
+}
+
+func formatSampleValue(value float64) string {
+	magnitude := math.Abs(value)
+	switch {
+	case magnitude >= 1e9:
+		return fmt.Sprintf("%.1fG", value/1e9)
+	case magnitude >= 1e6:
+		return fmt.Sprintf("%.1fM", value/1e6)
+	case magnitude >= 1e3:
+		return fmt.Sprintf("%.1fk", value/1e3)
+	case magnitude != 0 && magnitude < 0.01:
+		return fmt.Sprintf("%.1e", value)
+	default:
+		return strings.TrimSuffix(strings.TrimRight(fmt.Sprintf("%.2f", value), "0"), ".")
+	}
+}
+
+func sampleTimeLabel(epochMilliseconds int64) string {
+	return time.UnixMilli(epochMilliseconds).UTC().Format("15:04:05")
 }
 
 func buildVerdictChart(summary reporttypes.Summary) verdictChart {
@@ -286,7 +398,7 @@ const dashboardHTMLTemplate = `<!doctype html>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
 <title>{{.Dashboard.Title}} · SigNoz migration report</title>
 <style>
-:root{color-scheme:dark;--bg:#0b0d12;--surface:#131720;--line:#282e3b;--text:#f2f4f8;--muted:#9ca6b8;--orange:#ff6b35;--red:#ff6577;--green:#52d273;--blue:#61a8ff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(1120px,calc(100% - 32px));margin:48px auto 96px}header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:28px}.eyebrow{color:var(--orange);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}h1{font-size:clamp(30px,5vw,52px);line-height:1.05;margin:10px 0 14px;letter-spacing:-.035em}h2{font-size:24px;margin:42px 0 14px}h3{font-size:18px;margin:0}.muted,.path{color:var(--muted)}.path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;overflow-wrap:anywhere}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:24px 0}.metric,.panel,.variable,.notice{background:var(--surface);border:1px solid var(--line);border-radius:10px}.metric{padding:16px}.metric strong{display:block;font-size:27px}.metric span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.notice{padding:16px 18px;border-left:4px solid var(--red)}.panel{margin:12px 0;padding:18px}.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.badges{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.badge{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;letter-spacing:.03em}.badge.native{border-color:#265f36;color:var(--green)}.badge.pass{border-color:#28558a;color:var(--blue)}.badge.review{border-color:#783843;color:var(--red)}details{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}summary{cursor:pointer;font-weight:650}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#090b0f;border:1px solid var(--line);border-radius:7px;padding:13px;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.query{margin:14px 0 0;padding:14px;border-left:2px solid var(--line)}.query.review{border-color:var(--red)}.query.pass{border-color:var(--blue)}.query.native{border-color:var(--green)}.query-title{display:flex;justify-content:space-between;gap:12px}.variables{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.variable{padding:14px}.glossary,.review-table{width:100%;border-collapse:collapse}.glossary th,.glossary td,.review-table th,.review-table td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px}.glossary th,.review-table th{color:var(--muted);font-size:12px;text-transform:uppercase}.glossary code{color:var(--orange);font-size:12px}.hero{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap}.chart{display:flex;align-items:center;gap:20px}.donut{width:158px;height:158px;border-radius:50%;position:relative;flex:none}.donut-center{position:absolute;inset:21px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}.donut-center strong{font-size:31px;letter-spacing:-.02em}.donut-center span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em}.legend{list-style:none;margin:0;padding:0;display:grid;gap:9px}.legend li{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:13px}.legend strong{color:var(--text)}.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}.dot.native{background:var(--green)}.dot.pass{background:var(--blue)}.dot.review{background:var(--red)}.metric{border-top:3px solid var(--line)}.metric.m-green{border-top-color:var(--green)}.metric.m-blue{border-top-color:var(--blue)}.metric.m-red{border-top-color:var(--red)}.metric.m-orange{border-top-color:var(--orange)}.panel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;align-items:start}.panel-grid .panel{margin:0}.panel{border-top:3px solid var(--line)}.panel.native{border-top-color:var(--green)}.panel.pass{border-top-color:var(--blue)}.panel.review{border-top-color:var(--red)}.fidelity{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;flex-wrap:wrap}.meter{flex:1;min-width:90px;height:8px;background:#090b0f;border:1px solid var(--line);border-radius:99px;overflow:hidden}.meter i{display:block;height:100%;border-radius:99px}.meter.good i{background:linear-gradient(90deg,var(--green),#8be09a)}.meter.bad i{background:linear-gradient(90deg,var(--orange),var(--red))}@media(max-width:620px){main{width:min(100% - 20px,1120px);margin-top:24px}.panel-head,.query-title{display:block}.badge{margin-top:6px}.review-table{display:block;overflow-x:auto}.hero{display:block}.chart{margin-top:20px}.panel-grid{grid-template-columns:1fr}}
+:root{color-scheme:dark;--bg:#0b0d12;--surface:#131720;--line:#282e3b;--text:#f2f4f8;--muted:#9ca6b8;--orange:#ff6b35;--red:#ff6577;--green:#52d273;--blue:#61a8ff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(1120px,calc(100% - 32px));margin:48px auto 96px}header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:28px}.eyebrow{color:var(--orange);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}h1{font-size:clamp(30px,5vw,52px);line-height:1.05;margin:10px 0 14px;letter-spacing:-.035em}h2{font-size:24px;margin:42px 0 14px}h3{font-size:18px;margin:0}.muted,.path{color:var(--muted)}.path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;overflow-wrap:anywhere}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:24px 0}.metric,.panel,.variable,.notice{background:var(--surface);border:1px solid var(--line);border-radius:10px}.metric{padding:16px}.metric strong{display:block;font-size:27px}.metric span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.notice{padding:16px 18px;border-left:4px solid var(--red)}.panel{margin:12px 0;padding:18px}.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.badges{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.badge{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;letter-spacing:.03em}.badge.native{border-color:#265f36;color:var(--green)}.badge.pass{border-color:#28558a;color:var(--blue)}.badge.review{border-color:#783843;color:var(--red)}details{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}summary{cursor:pointer;font-weight:650}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#090b0f;border:1px solid var(--line);border-radius:7px;padding:13px;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.query{margin:14px 0 0;padding:14px;border-left:2px solid var(--line)}.query.review{border-color:var(--red)}.query.pass{border-color:var(--blue)}.query.native{border-color:var(--green)}.query-title{display:flex;justify-content:space-between;gap:12px}.variables{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.variable{padding:14px}.glossary,.review-table{width:100%;border-collapse:collapse}.glossary th,.glossary td,.review-table th,.review-table td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px}.glossary th,.review-table th{color:var(--muted);font-size:12px;text-transform:uppercase}.glossary code{color:var(--orange);font-size:12px}.hero{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap}.chart{display:flex;align-items:center;gap:20px}.donut{width:158px;height:158px;border-radius:50%;position:relative;flex:none}.donut-center{position:absolute;inset:21px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}.donut-center strong{font-size:31px;letter-spacing:-.02em}.donut-center span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em}.legend{list-style:none;margin:0;padding:0;display:grid;gap:9px}.legend li{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:13px}.legend strong{color:var(--text)}.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}.dot.native{background:var(--green)}.dot.pass{background:var(--blue)}.dot.review{background:var(--red)}.metric{border-top:3px solid var(--line)}.metric.m-green{border-top-color:var(--green)}.metric.m-blue{border-top-color:var(--blue)}.metric.m-red{border-top-color:var(--red)}.metric.m-orange{border-top-color:var(--orange)}.panel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;align-items:start}.panel-grid .panel{margin:0}.panel{border-top:3px solid var(--line)}.panel.native{border-top-color:var(--green)}.panel.pass{border-top-color:var(--blue)}.panel.review{border-top-color:var(--red)}.fidelity{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;flex-wrap:wrap}.meter{flex:1;min-width:90px;height:8px;background:#090b0f;border:1px solid var(--line);border-radius:99px;overflow:hidden}.meter i{display:block;height:100%;border-radius:99px}.meter.good i{background:linear-gradient(90deg,var(--green),#8be09a)}.meter.bad i{background:linear-gradient(90deg,var(--orange),var(--red))}.chartbox{margin:12px 0 4px;background:#090b0f;border:1px solid var(--line);border-radius:7px;padding:10px 12px}.chartbox svg{display:block;width:100%;height:auto}.chart-legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:8px;font-size:11px;color:var(--muted)}.chart-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px}@media(max-width:620px){main{width:min(100% - 20px,1120px);margin-top:24px}.panel-head,.query-title{display:block}.badge{margin-top:6px}.review-table{display:block;overflow-x:auto}.hero{display:block}.chart{margin-top:20px}.panel-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body><main>
@@ -315,6 +427,7 @@ const dashboardHTMLTemplate = `<!doctype html>
 {{if .Content}}<details><summary>Source panel content</summary><pre>{{.Content}}</pre></details>{{end}}
 {{range .Queries}}{{$query := .}}<div class="query {{class .Verdict}}"><div class="query-title"><strong>Query {{.RefID}} · {{.CandidateKind}} → {{.EmittedKind}}</strong><span class="badge {{class .Verdict}}">{{.Verdict}}</span></div>
 <div class="badges">{{range .ReasonCodes}}<span class="badge {{class $query.Verdict}}">{{.}}</span>{{end}}{{if .Validation.Executed}}<span class="badge">{{.Validation.Series}} series · {{.Validation.Points}} pts</span>{{end}}</div>
+{{if .Validation.Samples}}{{with spark .Validation.Samples}}<div class="chartbox">{{.}}</div>{{end}}{{end}}
 <details {{if review .Verdict}}open{{end}}><summary>Source and emitted query</summary>{{if .Format}}<div class="muted">Grafana query format: <code>{{.Format}}</code></div>{{end}}{{if .Step}}<div class="muted">Grafana target step: <code>{{.Step}}</code></div>{{end}}{{if .SourceFeatures}}<div class="muted">Unmapped query configuration</div><pre>{{json .SourceFeatures}}</pre>{{end}}<div class="muted">Source</div><pre>{{.Original}}</pre>{{if .PromQL}}<div class="muted">Emitted PromQL</div><pre>{{.PromQL}}</pre>{{end}}{{if .Builder}}<div class="muted">Builder candidate</div><pre>{{json .Builder}}</pre>{{end}}{{if .Formula}}<div class="muted">Formula candidate</div><pre>{{json .Formula}}</pre>{{end}}{{if .ParseErrors}}<div class="muted">Parse errors</div><pre>{{json .ParseErrors}}</pre>{{end}}</details>
 {{with cmpstats .Comparison}}<div class="fidelity"><span class="muted">Differential fidelity</span><div class="meter {{if .WithinTolerance}}good{{else}}bad{{end}}"><i style="width:{{printf "%.1f" .BarPercent}}%"></i></div><span class="muted">{{.MatchedSeries}} series · {{.MatchedPoints}} pts · max err {{printf "%.3f" .MaxRelativePct}}%</span></div>{{end}}
 {{if .Comparison}}<details><summary>Differential comparison</summary><pre>{{json .Comparison}}</pre></details>{{end}}
