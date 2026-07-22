@@ -9,7 +9,7 @@ package perses
 import (
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 )
 
 // SchemaVersion is the Perses dashboard schema version string SigNoz's v2 API

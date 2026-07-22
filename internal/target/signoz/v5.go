@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/stableidentity"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/stableidentity"
 )
 
 // DashboardV5 is the SigNoz dashboard import payload.

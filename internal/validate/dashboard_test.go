@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	migrationreport "github.com/mansiverma897993/signoz/internal/report"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	migrationreport "github.com/mansiverma897993/noz-in/internal/report"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -3,7 +3,7 @@ package transpile
 import (
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/promql/parser"
 )

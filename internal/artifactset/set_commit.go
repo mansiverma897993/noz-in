@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/mansiverma897993/signoz/internal/atomicfile"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/atomicfile"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // commitBarrier exists so package tests can stop a publication after each

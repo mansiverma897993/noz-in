@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mansiverma897993/signoz/internal/atomicfile"
+	"github.com/mansiverma897993/noz-in/internal/atomicfile"
 )
 
 func readRealDirectoryBounded(root *os.Root, path string, maxEntries int) ([]os.DirEntry, error) {

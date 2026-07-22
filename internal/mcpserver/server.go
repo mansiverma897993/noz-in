@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/safeoutput"
-	"github.com/mansiverma897993/signoz/internal/version"
+	"github.com/mansiverma897993/noz-in/internal/safeoutput"
+	"github.com/mansiverma897993/noz-in/internal/version"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )

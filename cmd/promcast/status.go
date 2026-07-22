@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 
-	"github.com/mansiverma897993/signoz/internal/app"
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/app"
+	"github.com/mansiverma897993/noz-in/internal/model"
 )
 
 type statusError struct {

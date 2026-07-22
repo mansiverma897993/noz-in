@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // ValidateAdjacent verifies a portable, regular artifact next to reportPath.

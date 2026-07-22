@@ -1,8 +1,8 @@
 # promcast
 
-[![CI](https://github.com/mansiverma897993/signoz/actions/workflows/ci.yml/badge.svg)](https://github.com/mansiverma897993/signoz/actions/workflows/ci.yml)
+[![CI](https://github.com/mansiverma897993/noz-in/actions/workflows/ci.yml/badge.svg)](https://github.com/mansiverma897993/noz-in/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Go Reference](https://pkg.go.dev/badge/github.com/mansiverma897993/signoz.svg)](https://pkg.go.dev/github.com/mansiverma897993/signoz)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mansiverma897993/noz-in.svg)](https://pkg.go.dev/github.com/mansiverma897993/noz-in)
 
 `promcast` converts Grafana dashboards and Prometheus alerting rules into
 SigNoz artifacts, validates the exact target queries against live SigNoz APIs,
@@ -56,7 +56,7 @@ source-namespaced `promcast_id` label.
 Go 1.25 or newer is required.
 
 ```sh
-go install github.com/mansiverma897993/signoz/cmd/promcast@latest
+go install github.com/mansiverma897993/noz-in/cmd/promcast@latest
 promcast version
 ```
 

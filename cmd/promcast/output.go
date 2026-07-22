@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"github.com/mansiverma897993/signoz/internal/app"
+	"github.com/mansiverma897993/noz-in/internal/app"
 )
 
 func jsonOutput(commandFlag interface{ GetBool(string) (bool, error) }) bool {

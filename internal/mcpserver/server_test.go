@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	reportpkg "github.com/mansiverma897993/signoz/internal/report"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	reportpkg "github.com/mansiverma897993/noz-in/internal/report"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

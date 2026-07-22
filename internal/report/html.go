@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/safeoutput"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/safeoutput"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 type reasonEntry struct {

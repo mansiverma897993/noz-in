@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // ReadCommitted verifies a declared generation and all of its members under

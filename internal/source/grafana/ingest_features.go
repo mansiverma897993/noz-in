@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 )
 
 func dashboardSourceFeatures(raw rawDashboard) []model.SourceFeature {

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/internal/validate"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/validate"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 func applyRuleWritePlan(

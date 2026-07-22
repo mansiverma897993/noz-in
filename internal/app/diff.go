@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/diff"
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/diff"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // DifferentialOptions controls live Prometheus-to-SigNoz semantic validation.

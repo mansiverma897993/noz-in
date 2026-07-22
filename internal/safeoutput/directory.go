@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mansiverma897993/signoz/internal/atomicfile"
+	"github.com/mansiverma897993/noz-in/internal/atomicfile"
 )
 
 // PinnedDirectory owns identity-verified handles to a real directory. Root

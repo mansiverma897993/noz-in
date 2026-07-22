@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mansiverma897993/signoz/internal/app"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/app"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 type ruleHTMLRecord struct {

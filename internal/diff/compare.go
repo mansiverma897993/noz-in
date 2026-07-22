@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	sourceprometheus "github.com/mansiverma897993/signoz/internal/source/prometheus"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	sourceprometheus "github.com/mansiverma897993/noz-in/internal/source/prometheus"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 )
 
 // Status is the outcome of one query comparison.

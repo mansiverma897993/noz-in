@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/httpdetail"
+	"github.com/mansiverma897993/noz-in/internal/httpdetail"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

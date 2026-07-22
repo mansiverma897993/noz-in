@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/target/perses"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/target/perses"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 )
 
 // writeV6Sibling transforms the verified v5 dashboard into the Perses v6 shape

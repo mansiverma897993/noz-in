@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/mansiverma897993/signoz/internal/version"
+	"github.com/mansiverma897993/noz-in/internal/version"
 	"github.com/spf13/cobra"
 )
 

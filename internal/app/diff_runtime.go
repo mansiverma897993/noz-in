@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/diff"
-	"github.com/mansiverma897993/signoz/internal/migrate"
-	"github.com/mansiverma897993/signoz/internal/model"
-	sourcegrafana "github.com/mansiverma897993/signoz/internal/source/grafana"
-	sourceprometheus "github.com/mansiverma897993/signoz/internal/source/prometheus"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/internal/transpile"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/diff"
+	"github.com/mansiverma897993/noz-in/internal/migrate"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	sourcegrafana "github.com/mansiverma897993/noz-in/internal/source/grafana"
+	sourceprometheus "github.com/mansiverma897993/noz-in/internal/source/prometheus"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/transpile"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 type differentialRuntime struct {

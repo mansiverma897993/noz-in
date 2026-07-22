@@ -5,8 +5,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 )
 
 // NativeExecutor runs v5 query_range requests and returns the series produced for

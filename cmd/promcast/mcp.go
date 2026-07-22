@@ -16,9 +16,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/app"
-	"github.com/mansiverma897993/signoz/internal/mcpserver"
-	"github.com/mansiverma897993/signoz/internal/metricmap"
+	"github.com/mansiverma897993/noz-in/internal/app"
+	"github.com/mansiverma897993/noz-in/internal/mcpserver"
+	"github.com/mansiverma897993/noz-in/internal/metricmap"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/spf13/cobra"
 )

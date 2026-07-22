@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // executionSamplePointLimit bounds how many points each retained series

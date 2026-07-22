@@ -3,8 +3,8 @@ package app
 import (
 	"fmt"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	sourceprometheus "github.com/mansiverma897993/signoz/internal/source/prometheus"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	sourceprometheus "github.com/mansiverma897993/noz-in/internal/source/prometheus"
 )
 
 func loadRuleSets(paths []string) ([]model.RuleSet, map[string]model.Rule, error) {

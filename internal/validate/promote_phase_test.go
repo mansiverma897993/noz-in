@@ -3,7 +3,7 @@ package validate
 import (
 	"testing"
 
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 )
 
 // step and window used by the phase-shift fixtures.

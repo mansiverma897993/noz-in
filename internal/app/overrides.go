@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 	"gopkg.in/yaml.v3"
 )
 

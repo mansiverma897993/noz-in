@@ -12,13 +12,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/artifactset"
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/rules"
-	"github.com/mansiverma897993/signoz/internal/safeoutput"
-	sourceprometheus "github.com/mansiverma897993/signoz/internal/source/prometheus"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/internal/transpile"
+	"github.com/mansiverma897993/noz-in/internal/artifactset"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/rules"
+	"github.com/mansiverma897993/noz-in/internal/safeoutput"
+	sourceprometheus "github.com/mansiverma897993/noz-in/internal/source/prometheus"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/transpile"
 )
 
 func preflightRuleOutput(

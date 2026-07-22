@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 )
 
 type signozComparison struct {

@@ -14,11 +14,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/diff"
-	"github.com/mansiverma897993/signoz/internal/model"
-	sourceprometheus "github.com/mansiverma897993/signoz/internal/source/prometheus"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/diff"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	sourceprometheus "github.com/mansiverma897993/noz-in/internal/source/prometheus"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

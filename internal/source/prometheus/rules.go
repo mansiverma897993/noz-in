@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 	prommodel "github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/model/rulefmt"
 	"github.com/prometheus/prometheus/promql/parser"

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	sourceprometheus "github.com/mansiverma897993/signoz/internal/source/prometheus"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	sourceprometheus "github.com/mansiverma897993/noz-in/internal/source/prometheus"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -27,9 +27,9 @@ linters:
           files:
             - "**/internal/model/**"
           deny:
-            - pkg: github.com/mansiverma897993/signoz/internal/source
+            - pkg: github.com/mansiverma897993/noz-in/internal/source
               desc: the neutral model must not depend on source adapters
-            - pkg: github.com/mansiverma897993/signoz/internal/target
+            - pkg: github.com/mansiverma897993/noz-in/internal/target
               desc: the neutral model must not depend on target adapters
     iface:
       enable:

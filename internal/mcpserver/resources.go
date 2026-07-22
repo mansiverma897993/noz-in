@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 

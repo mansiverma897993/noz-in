@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/internal/validate"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/validate"
 )
 
 // CandidateSpec is an agent-proposed SigNoz query to verify against a source

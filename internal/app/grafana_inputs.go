@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/source/grafana"
-	"github.com/mansiverma897993/signoz/internal/stableidentity"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/source/grafana"
+	"github.com/mansiverma897993/noz-in/internal/stableidentity"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 )
 
 type preparedGrafanaInput struct {

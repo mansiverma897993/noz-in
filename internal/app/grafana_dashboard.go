@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/migrate"
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/report"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/internal/transpile"
-	"github.com/mansiverma897993/signoz/internal/validate"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/migrate"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/report"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/transpile"
+	"github.com/mansiverma897993/noz-in/internal/validate"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 type grafanaMigrationRun struct {

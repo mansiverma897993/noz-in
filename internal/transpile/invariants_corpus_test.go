@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/source/grafana"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/source/grafana"
 	"github.com/stretchr/testify/require"
 )
 

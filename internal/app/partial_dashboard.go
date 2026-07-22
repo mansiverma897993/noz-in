@@ -3,8 +3,8 @@ package app
 import (
 	"sort"
 
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // validationSafeDashboard removes whole widgets that failed live validation.

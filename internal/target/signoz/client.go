@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/httpdetail"
-	"github.com/mansiverma897993/signoz/internal/transportpolicy"
+	"github.com/mansiverma897993/noz-in/internal/httpdetail"
+	"github.com/mansiverma897993/noz-in/internal/transportpolicy"
 )
 
 const maxResponseSize = 32 << 20

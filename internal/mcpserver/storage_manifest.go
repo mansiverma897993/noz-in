@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 func (service *Service) readManifest(id string) (manifest, error) {

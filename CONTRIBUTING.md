@@ -5,7 +5,7 @@ Thank you for improving `promcast`.
 ## Development setup
 
 ```sh
-git clone https://github.com/mansiverma897993/signoz
+git clone https://github.com/mansiverma897993/noz-in
 cd promcast
 make build          # ./bin/promcast
 make test           # unit tests; corpus tests skip unless the env var below is set

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

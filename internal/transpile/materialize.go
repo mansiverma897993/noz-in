@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 )
 
 // MaterializeSourceExpression rewrites Grafana globals and substitutes concrete dashboard values.

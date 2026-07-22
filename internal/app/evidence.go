@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/internal/transpile"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/transpile"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // ValidateStoredDashboardArtifact verifies the exact bytes, portable filename,

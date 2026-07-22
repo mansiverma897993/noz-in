@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 	"github.com/stretchr/testify/assert"
 )
 

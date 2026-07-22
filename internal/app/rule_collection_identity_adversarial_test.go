@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mansiverma897993/signoz/internal/rules"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/rules"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

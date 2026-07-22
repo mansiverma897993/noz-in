@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/app"
+	"github.com/mansiverma897993/noz-in/internal/app"
 	"github.com/spf13/cobra"
 )
 

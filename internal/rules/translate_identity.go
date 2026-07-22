@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	projectmodel "github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/stableidentity"
+	projectmodel "github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/stableidentity"
 	"github.com/prometheus/prometheus/promql/parser"
 )
 

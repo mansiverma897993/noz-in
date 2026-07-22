@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/rules"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/rules"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

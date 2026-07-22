@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/app"
-	"github.com/mansiverma897993/signoz/internal/validate"
+	"github.com/mansiverma897993/noz-in/internal/app"
+	"github.com/mansiverma897993/noz-in/internal/validate"
 	"github.com/spf13/cobra"
 )
 

@@ -1,4 +1,4 @@
-module github.com/mansiverma897993/signoz
+module github.com/mansiverma897993/noz-in
 
 go 1.25.12
 

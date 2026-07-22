@@ -7,7 +7,7 @@ COPY . .
 ARG VERSION=dev
 ARG COMMIT=none
 RUN CGO_ENABLED=0 go build -trimpath \
-    -ldflags="-s -w -X github.com/mansiverma897993/signoz/internal/version.version=${VERSION} -X github.com/mansiverma897993/signoz/internal/version.commit=${COMMIT}" \
+    -ldflags="-s -w -X github.com/mansiverma897993/noz-in/internal/version.version=${VERSION} -X github.com/mansiverma897993/noz-in/internal/version.commit=${COMMIT}" \
     -o /promcast ./cmd/promcast
 RUN install -d -m 0700 -o 65532 -g 65532 /workspace /tmp/promcast
 

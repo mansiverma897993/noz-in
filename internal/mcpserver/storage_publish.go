@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/artifactset"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/artifactset"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 const (

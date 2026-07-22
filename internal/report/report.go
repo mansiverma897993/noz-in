@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/version"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/version"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // Build creates an evidence report from a migration.

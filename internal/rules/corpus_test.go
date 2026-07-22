@@ -7,9 +7,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/mansiverma897993/signoz/internal/model"
-	sourceprometheus "github.com/mansiverma897993/signoz/internal/source/prometheus"
-	"github.com/mansiverma897993/signoz/internal/transpile"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	sourceprometheus "github.com/mansiverma897993/noz-in/internal/source/prometheus"
+	"github.com/mansiverma897993/noz-in/internal/transpile"
 	"github.com/stretchr/testify/require"
 )
 

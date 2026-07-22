@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mansiverma897993/signoz/internal/atomicfile"
+	"github.com/mansiverma897993/noz-in/internal/atomicfile"
 )
 
 // WriteFileAtomic writes data through an identity-pinned parent directory and

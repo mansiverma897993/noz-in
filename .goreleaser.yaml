@@ -25,8 +25,8 @@ builds:
     ldflags:
       - >-
         -s -w
-        -X github.com/mansiverma897993/signoz/internal/version.version={{ .Version }}
-        -X github.com/mansiverma897993/signoz/internal/version.commit={{ .Commit }}
+        -X github.com/mansiverma897993/noz-in/internal/version.version={{ .Version }}
+        -X github.com/mansiverma897993/noz-in/internal/version.commit={{ .Commit }}
 
 archives:
   - id: binaries

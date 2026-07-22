@@ -3,7 +3,7 @@ package validate
 import (
 	"context"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 )
 
 // FidelityBand classifies how closely a candidate Builder query reproduces its

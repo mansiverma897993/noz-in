@@ -3,7 +3,7 @@ package signoz
 import (
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 )
 
 // NativeProbeRequests builds the two v5 query_range requests used to prove that a

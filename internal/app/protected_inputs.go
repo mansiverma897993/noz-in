@@ -1,6 +1,6 @@
 package app
 
-import "github.com/mansiverma897993/signoz/internal/safeoutput"
+import "github.com/mansiverma897993/noz-in/internal/safeoutput"
 
 // ProtectedInputPath identifies a file-backed input that generated artifacts
 // must never replace through a lexical path, symlink, or hardlink alias.

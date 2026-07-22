@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mansiverma897993/signoz/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/model"
 )
 
 func normalizeVariable(raw rawVariable, index int, bindings map[string]string) model.Variable {

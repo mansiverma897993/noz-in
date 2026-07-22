@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mansiverma897993/signoz/internal/releasegate"
+	"github.com/mansiverma897993/noz-in/internal/releasegate"
 )
 
 func main() {

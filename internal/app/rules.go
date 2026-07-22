@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mansiverma897993/signoz/internal/rules"
-	"github.com/mansiverma897993/signoz/internal/stableidentity"
-	"github.com/mansiverma897993/signoz/internal/target/signoz"
-	"github.com/mansiverma897993/signoz/internal/transpile"
-	"github.com/mansiverma897993/signoz/pkg/reporttypes"
+	"github.com/mansiverma897993/noz-in/internal/rules"
+	"github.com/mansiverma897993/noz-in/internal/stableidentity"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
+	"github.com/mansiverma897993/noz-in/internal/transpile"
+	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
 
 // RuleOptions controls Prometheus rule migration and optional target writes.

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	projectmodel "github.com/mansiverma897993/signoz/internal/model"
+	projectmodel "github.com/mansiverma897993/noz-in/internal/model"
 	prommodel "github.com/prometheus/common/model"
 )
 

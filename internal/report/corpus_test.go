@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mansiverma897993/signoz/internal/migrate"
-	"github.com/mansiverma897993/signoz/internal/model"
-	"github.com/mansiverma897993/signoz/internal/source/grafana"
-	"github.com/mansiverma897993/signoz/internal/transpile"
+	"github.com/mansiverma897993/noz-in/internal/migrate"
+	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/source/grafana"
+	"github.com/mansiverma897993/noz-in/internal/transpile"
 	"github.com/stretchr/testify/require"
 )
 
