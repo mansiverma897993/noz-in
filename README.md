@@ -3,6 +3,10 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Go Reference](https://pkg.go.dev/badge/github.com/mansiverma897993/noz-in.svg)](https://pkg.go.dev/github.com/mansiverma897993/noz-in)
 
+> **Migrate every Grafana dashboard to SigNoz immediately through safe PromQL
+> passthrough — then automatically promote only the queries proven equivalent
+> to native SigNoz Builder queries.**
+
 **noz-in** is a deterministic query-compatibility and migration engine that
 moves observability estates *into* SigNoz. It ships as the **`promcast`** CLI,
 which converts Grafana dashboards and Prometheus alerting rules into SigNoz
