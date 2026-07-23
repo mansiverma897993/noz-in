@@ -9,6 +9,7 @@
 # that host's private address, so it is local inventory. The reproducible judge
 # path is deploy/local/, whose casting.yaml and casting.yaml.lock are committed.
 /deploy/destination/casting.yaml
+/deploy/destination/casting.yaml.lock
 *.coverprofile
 *.prof
 .DS_Store
