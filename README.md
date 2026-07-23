@@ -4,7 +4,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/mansiverma897993/noz-in.svg)](https://pkg.go.dev/github.com/mansiverma897993/noz-in)
 
 > **Migrate every Grafana dashboard to SigNoz immediately through safe PromQL
-> passthrough — then automatically promote only the queries proven equivalent
+> passthrough then automatically promote only the queries proven equivalent
 > to native SigNoz Builder queries.**
 
 **noz-in** is a deterministic query-compatibility and migration engine that
