@@ -1,12 +1,14 @@
-# promcast
+# noz-in
 
 [![CI](https://github.com/mansiverma897993/noz-in/actions/workflows/ci.yml/badge.svg)](https://github.com/mansiverma897993/noz-in/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Go Reference](https://pkg.go.dev/badge/github.com/mansiverma897993/noz-in.svg)](https://pkg.go.dev/github.com/mansiverma897993/noz-in)
 
-`promcast` converts Grafana dashboards and Prometheus alerting rules into
-SigNoz artifacts, validates the exact target queries against live SigNoz APIs,
-and explains every compatibility decision in JSON and self-contained HTML.
+**noz-in** is a deterministic query-compatibility and migration engine that
+moves observability estates *into* SigNoz. It ships as the **`promcast`** CLI,
+which converts Grafana dashboards and Prometheus alerting rules into SigNoz
+artifacts, validates the exact target queries against live SigNoz APIs, and
+explains every compatibility decision in JSON and self-contained HTML.
 
 This is an independent community project, not affiliated with or endorsed by
 SigNoz, Inc. The code is organized so proven adapters or compatibility rules
@@ -239,6 +241,33 @@ promcast mcp --transport stdio --root /workspace --out /workspace/out
 Credentials are server configuration rather than tool arguments; HTTP mode is
 loopback-only with a bearer token. Quota, crash recovery, and the container
 smoke test are documented in [docs/mcp.md](docs/mcp.md).
+
+## Agent skill: promcast-assist
+
+[`skills/promcast-assist`](skills/promcast-assist/) is a packaged Agent Skill
+that any coding agent (Claude Code, or anything that reads `SKILL.md`) can load
+to run migrations conversationally and raise the native-conversion rate safely.
+The division of labor is strict and is what keeps agent involvement
+trustworthy:
+
+1. **Deterministic first.** The agent always runs the `promcast` CLI, which
+   migrates everything and live-verifies what it can prove. This step alone
+   yields a complete, rendering dashboard.
+2. **Agent proposes, never decides.** For queries the CLI left as passthrough,
+   the agent proposes Builder candidates using the bundled reference material
+   ([PromQL→Builder mapping](skills/promcast-assist/references/promql-to-builder.md),
+   [gotchas](skills/promcast-assist/references/gotchas.md),
+   [report schema](skills/promcast-assist/references/report-schema.md)).
+3. **Every proposal passes the same live gate.** `promcast verify` executes the
+   candidate and the source PromQL against the live target and only reports
+   `ADOPTED` inside the fidelity tolerance — a hallucinated query cannot pass a
+   numeric differential it never satisfies.
+4. **Adoption is re-verified.** Adopted overrides go into `overrides.yaml`, and
+   re-emitting re-verifies each one live before it is written as `native`.
+
+The skill requires the `promcast` binary on `PATH` and a reachable SigNoz URL
+with an API key. The full propose → verify → adopt sequence is diagrammed in
+[docs/transpiler.md](docs/transpiler.md).
 
 ## Evidence
 
