@@ -7,6 +7,11 @@
 > passthrough then automatically promote only the queries proven equivalent
 > to native SigNoz Builder queries.**
 
+![Grafana's Node Exporter Full dashboard running in SigNoz after migration](docs/images/signoz-migrated-local.jpeg)
+
+*Grafana's Node Exporter Full — 140 panels — running in SigNoz after one
+`promcast` command, on the local stack this repository ships.*
+
 **noz-in** is a deterministic query-compatibility and migration engine that
 moves observability estates *into* SigNoz. It ships as the **`promcast`** CLI,
 which converts Grafana dashboards and Prometheus alerting rules into SigNoz
@@ -43,11 +48,16 @@ evaluating on the target:
 
 ![A migrated NodeSystemSaturation alert rule in SigNoz](docs/images/signoz-alert-rule.png)
 
-These captures are from the two-node AWS reference run (SigNoz 0.133.0). They
-evidence that the migrated payloads render and that the alert rules import and
-evaluate. They are deliberately **not** the evidence for native-query
-correctness — that claim is only ever backed by the live differential described
-below, and by the generated report.
+The same dashboard on the local stack in `deploy/local/`, which is what anyone
+reproducing this repository gets:
+
+![Migrated Node Exporter Full rendering live data on the local SigNoz stack](docs/images/signoz-migrated-local.jpeg)
+
+The paired source/target captures above are from the two-node AWS reference run
+(SigNoz 0.133.0). They evidence that the migrated payloads render and that the
+alert rules import and evaluate. They are deliberately **not** the evidence for
+native-query correctness — that claim is only ever backed by the live
+differential described below, and by the generated report.
 
 The reports themselves are the primary artifact, and they are committed:
 [`docs/examples/`](docs/examples/) holds untouched HTML evidence from real
