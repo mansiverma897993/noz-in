@@ -373,13 +373,20 @@ func emitWidget(migration model.Migration, panel model.Panel, id string) Widget 
 }
 
 func emittedPanelType(migration model.Migration, panel model.Panel) string {
-	if panel.Kind == model.PanelKindHistogram || panel.Kind == model.PanelKindBar {
+	return EmittedPanelType(panel.Kind, migration.PanelMode(panel))
+}
+
+// EmittedPanelType reports the SigNoz visualization a source panel of this kind
+// and translation mode is emitted as. Evidence reporting calls it so a report
+// can never describe a visualization the emitter did not actually write.
+func EmittedPanelType(kind model.PanelKind, mode model.TranslationKind) string {
+	if kind == model.PanelKindHistogram || kind == model.PanelKindBar {
 		return "graph"
 	}
-	if migration.PanelMode(panel) == model.TranslationPromQL && panel.Kind == model.PanelKindTable {
+	if mode == model.TranslationPromQL && kind == model.PanelKindTable {
 		return "graph"
 	}
-	return panelType(panel.Kind)
+	return panelType(kind)
 }
 
 func emitWidgetQuery(migration model.Migration, panel model.Panel, id string) WidgetQuery {

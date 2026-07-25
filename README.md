@@ -18,6 +18,65 @@ SigNoz, Inc. The code is organized so proven adapters or compatibility rules
 can be proposed to SigNoz later without coupling its core model to Grafana
 internals.
 
+## Why this matters
+
+Importing existing Grafana dashboards is one of the most-requested things in
+the SigNoz community — it is the subject of
+[SigNoz/signoz#6425](https://github.com/SigNoz/signoz/issues/6425), where users
+describe it as blocking their adoption and the maintainers describe the query
+translation as a large piece of work. Teams do not evaluate an observability
+backend with an empty screen; they evaluate it with the dashboards they already
+depend on.
+
+noz-in removes that blocker in one command, for dashboards **and** the
+Prometheus alert rules that go with them — and, unlike a best-effort converter,
+it tells you exactly which queries it proved and which it did not.
+
+## See it
+
+| Source: Grafana | Migrated: SigNoz |
+|---|---|
+| ![Node Exporter Full on Grafana 12.1.0](docs/images/grafana-source.png) | ![The same dashboard migrated into SigNoz](docs/images/signoz-migrated.png) |
+
+Alert rules travel with the dashboards. A migrated Node Exporter alert,
+evaluating on the target:
+
+![A migrated NodeSystemSaturation alert rule in SigNoz](docs/images/signoz-alert-rule.png)
+
+These captures are from the two-node AWS reference run (SigNoz 0.133.0). They
+evidence that the migrated payloads render and that the alert rules import and
+evaluate. They are deliberately **not** the evidence for native-query
+correctness — that claim is only ever backed by the live differential described
+below, and by the generated report.
+
+The reports themselves are the primary artifact, and they are committed:
+[`docs/examples/`](docs/examples/) holds untouched HTML evidence from real
+local runs — a dashboard migration (140/140 panels, every executed query
+charted from the series the live target actually returned) and an alert-rule
+migration. Open them in a browser; they are self-contained single files.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    G["Grafana dashboard JSON"] --> S["Source adapters<br/>schema shims · recursive rows<br/>datasources · variables"]
+    R["Prometheus rule YAML"] --> S
+    S --> M["Neutral model<br/>panels · queries · verdicts"]
+    M --> T["Transpiler<br/>canonical Prometheus AST<br/>→ Builder / formula candidate"]
+    T --> D{"Structurally<br/>representable?"}
+    D -- "no" --> PQ["PromQL passthrough<br/>+ reason code"]
+    D -- "candidate" --> V["Live differential gate<br/>Builder vs its own PromQL<br/>on the real target"]
+    V -- "equivalent within --fidelity" --> N["native Builder query"]
+    V -- "diverged · phase shift · no data" --> PQ
+    N --> E["SigNoz v5 emitter"]
+    PQ --> E
+    E --> API["SigNoz APIs<br/>/api/v5/query_range<br/>/api/v1/dashboards · /api/v1/rules"]
+    E --> EV["Evidence report<br/>JSON + self-contained HTML"]
+```
+
+Package-by-package reading order is in
+[docs/architecture.md](docs/architecture.md).
+
 ## How it works
 
 Every migration rests on one floor and one invariant:
@@ -185,6 +244,24 @@ before any target write. The full contract — validation, disabled-candidate
 safety on pinned SigNoz v0.133, identity rules, and template rewriting — is in
 [docs/rules.md](docs/rules.md).
 
+**Refusing to write is a feature.** kube-prometheus ships severity variants
+that share an alert name — `NodeFilesystemSpaceFillingUp` exists as both a
+warning and a critical rule in the same group, and
+`KubePersistentVolumeFillingUp` does the same. Two rules that would resolve to
+one stable identity in one source namespace are a silent-overwrite bug waiting
+to happen, so the run stops before any target write and says exactly which two
+rules collided and how to separate them:
+
+```text
+namespaced Prometheus rules "NodeFilesystemSpaceFillingUp" (…/groups/0/rules/0, group "node-exporter")
+and "NodeFilesystemSpaceFillingUp" (…/groups/0/rules/1, group "node-exporter") have the same stable
+identity in source namespace "judge-local"; add distinct promcast_source_id labels or use separate source namespaces
+```
+
+A migration tool that quietly imports one of those two is worse than one that
+stops. Where names are genuinely distinct, duplicates instead receive a
+deterministic suffix and the `ALERT_NAME_DISAMBIGUATED` reason code.
+
 ## Compare source and target data
 
 ```sh
@@ -250,8 +327,12 @@ smoke test are documented in [docs/mcp.md](docs/mcp.md).
 [`skills/promcast-assist`](skills/promcast-assist/) is a packaged Agent Skill
 that any coding agent (Claude Code, or anything that reads `SKILL.md`) can load
 to run migrations conversationally and raise the native-conversion rate safely.
-The division of labor is strict and is what keeps agent involvement
-trustworthy:
+
+**The agent is never trusted.** It cannot mark a query correct, and it cannot
+write a dashboard the tool has not verified — its proposals go through the same
+live differential as the deterministic rules do. An agent that hallucinates a
+plausible-but-wrong Builder query simply fails the numeric comparison and the
+query stays as honest passthrough. The division of labor is strict:
 
 1. **Deterministic first.** The agent always runs the `promcast` CLI, which
    migrates everything and live-verifies what it can prove. This step alone
@@ -271,6 +352,32 @@ trustworthy:
 The skill requires the `promcast` binary on `PATH` and a reachable SigNoz URL
 with an API key. The full propose → verify → adopt sequence is diagrammed in
 [docs/transpiler.md](docs/transpiler.md).
+
+## How deeply this uses SigNoz
+
+This is not a JSON converter that happens to POST to SigNoz at the end. SigNoz's
+own query engine is the oracle the whole tool is built around:
+
+- **`/api/v5/query_range` as a truth oracle.** For every Builder candidate the
+  tool fires a *pair* of executions — the Builder envelope and the verbatim
+  PromQL — over the same window at the same step, then compares them series by
+  series and point by point. Conversion correctness is measured on SigNoz, not
+  asserted from a parser.
+- **`/api/v5/query_range/preview`** validates each emitted query, and the
+  metadata and attribute APIs resolve metric type, temporality, and label
+  identity before anything is claimed.
+- **Dashboard v5 and rule APIs** are used with stable, source-namespaced
+  identities so repeated runs reconcile instead of duplicating.
+- **The query model is exercised, not skimmed:** metric aggregations,
+  space/time aggregation pairs, formulas, group-by, filters, thresholds,
+  variables, and PromQL execution all round-trip through the emitter and are
+  re-read from the target.
+
+The temporal phase-shift finding came directly out of that pairing: candidates
+that matched in magnitude but trailed the passthrough by exactly one step were
+being counted as equivalent. They are now rejected with
+`BUILDER_TEMPORAL_PHASE_SHIFT`. That is the project's core idea in one line —
+**native is a measurement, not a claim.**
 
 ## Evidence
 

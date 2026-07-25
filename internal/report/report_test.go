@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -68,15 +69,19 @@ func TestEmittedPanelKindMirrorsV5GraphDowngrades(t *testing.T) {
 	}{
 		{name: "bar", kind: model.PanelKindBar, mode: model.TranslationBuilder, want: "graph"},
 		{name: "histogram", kind: model.PanelKindHistogram, mode: model.TranslationPromQL, want: "graph"},
-		{name: "PromQL value", kind: model.PanelKindValue, mode: model.TranslationPromQL, want: "graph"},
 		{name: "PromQL table", kind: model.PanelKindTable, mode: model.TranslationPromQL, want: "graph"},
-		{name: "PromQL pie", kind: model.PanelKindPie, mode: model.TranslationPromQL, want: "graph"},
+		{name: "PromQL value", kind: model.PanelKindValue, mode: model.TranslationPromQL, want: "value"},
+		{name: "PromQL pie", kind: model.PanelKindPie, mode: model.TranslationPromQL, want: "pie"},
 		{name: "Builder value", kind: model.PanelKindValue, mode: model.TranslationBuilder, want: "value"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			assert.Equal(t, test.want, emittedPanelKind(model.Panel{Kind: test.kind}, test.mode))
+			recorded := emittedPanelKind(model.Panel{Kind: test.kind}, test.mode)
+			assert.Equal(t, test.want, recorded)
+			// The evidence record must name the visualization the emitter
+			// actually writes, so the two can never drift apart again.
+			assert.Equal(t, signoz.EmittedPanelType(test.kind, test.mode), recorded)
 		})
 	}
 }

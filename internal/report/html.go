@@ -23,10 +23,30 @@ type reasonEntry struct {
 
 type dashboardHTMLView struct {
 	reporttypes.Report
-	Panels   []reporttypes.PanelRecord
-	Glossary []reasonEntry
-	Reviews  []reviewHTMLItem
-	Chart    verdictChart
+	Panels      []reporttypes.PanelRecord
+	Glossary    []reasonEntry
+	Reviews     []reviewHTMLItem
+	Chart       verdictChart
+	ReasonBars  []barItem
+	KindBars    []barItem
+	SeriesHisto []histogramBar
+}
+
+// barItem is one row of a horizontal comparison chart. Percent is relative to
+// the largest row so the widest bar always fills its track.
+type barItem struct {
+	Label   string
+	Count   int
+	Percent float64
+	Class   string
+}
+
+// histogramBar is one bucket of the returned-series distribution. Percent is
+// relative to the tallest bucket.
+type histogramBar struct {
+	Label   string
+	Count   int
+	Percent float64
 }
 
 // verdictChart carries the pre-computed conic-gradient ring for the header
@@ -115,6 +135,9 @@ func DashboardHTMLBytes(evidence reporttypes.Report) ([]byte, error) {
 		return strings.Compare(left.Code, right.Code)
 	})
 	view.Chart = buildVerdictChart(evidence.Summary)
+	view.ReasonBars = buildReasonBars(evidence)
+	view.KindBars = buildKindBars(evidence)
+	view.SeriesHisto = buildSeriesHistogram(evidence)
 
 	parsed, err := template.New("dashboard-report").Funcs(template.FuncMap{
 		"class":    statusClass,
@@ -270,6 +293,135 @@ func sampleTimeLabel(epochMilliseconds int64) string {
 	return time.UnixMilli(epochMilliseconds).UTC().Format("15:04:05")
 }
 
+// reasonBarLimit bounds the reason-code comparison chart so the card stays
+// readable; the full closed set is always listed in the glossary below it.
+const reasonBarLimit = 8
+
+// buildReasonBars counts every reason code recorded anywhere in the evidence
+// and returns the most frequent ones as a horizontal comparison chart.
+func buildReasonBars(evidence reporttypes.Report) []barItem {
+	counts := make(map[string]int)
+	for _, feature := range evidence.SourceFeatures {
+		counts[feature.ReasonCode]++
+	}
+	for _, variable := range evidence.Variables {
+		for _, reason := range variable.ReasonCodes {
+			counts[reason]++
+		}
+	}
+	for _, panel := range evidence.Panels {
+		for _, reason := range panel.ReasonCodes {
+			counts[reason]++
+		}
+		for _, query := range panel.Queries {
+			for _, reason := range query.ReasonCodes {
+				counts[reason]++
+			}
+		}
+	}
+	return topBars(counts, reasonBarLimit, func(label string) string {
+		switch {
+		case strings.Contains(label, "VERIFIED"):
+			return "native"
+		case strings.HasPrefix(label, "GRAFANA_") || strings.HasPrefix(label, "UNMAPPED_"):
+			return "pass"
+		default:
+			return "review"
+		}
+	})
+}
+
+// buildKindBars compares how many panels reached each target visualization.
+func buildKindBars(evidence reporttypes.Report) []barItem {
+	counts := make(map[string]int)
+	for _, panel := range evidence.Panels {
+		kind := strings.TrimSpace(panel.EmittedKind)
+		if kind == "" {
+			kind = "unspecified"
+		}
+		counts[kind]++
+	}
+	return topBars(counts, 0, func(label string) string {
+		if label == "omitted" || label == "unspecified" {
+			return "review"
+		}
+		return "native"
+	})
+}
+
+func topBars(counts map[string]int, limit int, class func(string) string) []barItem {
+	bars := make([]barItem, 0, len(counts))
+	highest := 0
+	for label, count := range counts {
+		bars = append(bars, barItem{Label: label, Count: count, Class: class(label)})
+		highest = max(highest, count)
+	}
+	slices.SortFunc(bars, func(left, right barItem) int {
+		if left.Count != right.Count {
+			return right.Count - left.Count
+		}
+		return strings.Compare(left.Label, right.Label)
+	})
+	if limit > 0 && len(bars) > limit {
+		bars = bars[:limit]
+	}
+	for index := range bars {
+		if highest > 0 {
+			bars[index].Percent = float64(bars[index].Count) / float64(highest) * 100
+		}
+	}
+	return bars
+}
+
+// seriesHistogramBuckets groups executed queries by how many series the live
+// target returned, which is the shape reviewers scan for fan-out surprises.
+var seriesHistogramBuckets = []struct {
+	label string
+	limit int
+}{
+	{label: "0", limit: 0},
+	{label: "1", limit: 1},
+	{label: "2-3", limit: 3},
+	{label: "4-7", limit: 7},
+	{label: "8-15", limit: 15},
+	{label: "16+", limit: math.MaxInt},
+}
+
+func buildSeriesHistogram(evidence reporttypes.Report) []histogramBar {
+	counts := make([]int, len(seriesHistogramBuckets))
+	executed := 0
+	for _, panel := range evidence.Panels {
+		for _, query := range panel.Queries {
+			if !query.Validation.Executed {
+				continue
+			}
+			executed++
+			for index, bucket := range seriesHistogramBuckets {
+				if query.Validation.Series <= bucket.limit {
+					counts[index]++
+					break
+				}
+			}
+		}
+	}
+	if executed == 0 {
+		return nil
+	}
+	highest := 0
+	for _, count := range counts {
+		highest = max(highest, count)
+	}
+	bars := make([]histogramBar, 0, len(counts))
+	for index, count := range counts {
+		bar := histogramBar{Label: seriesHistogramBuckets[index].label, Count: count}
+		if highest > 0 {
+			bar.Percent = float64(count) / float64(highest) * 100
+		}
+		bars = append(bars, bar)
+	}
+	return bars
+}
+
 func buildVerdictChart(summary reporttypes.Summary) verdictChart {
 	chart := verdictChart{
 		Native:      summary.Native,
@@ -399,6 +551,8 @@ const dashboardHTMLTemplate = `<!doctype html>
 <title>{{.Dashboard.Title}} · SigNoz migration report</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d12;--surface:#131720;--line:#282e3b;--text:#f2f4f8;--muted:#9ca6b8;--orange:#ff6b35;--red:#ff6577;--green:#52d273;--blue:#61a8ff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{width:min(1120px,calc(100% - 32px));margin:48px auto 96px}header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:28px}.eyebrow{color:var(--orange);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}h1{font-size:clamp(30px,5vw,52px);line-height:1.05;margin:10px 0 14px;letter-spacing:-.035em}h2{font-size:24px;margin:42px 0 14px}h3{font-size:18px;margin:0}.muted,.path{color:var(--muted)}.path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;overflow-wrap:anywhere}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:24px 0}.metric,.panel,.variable,.notice{background:var(--surface);border:1px solid var(--line);border-radius:10px}.metric{padding:16px}.metric strong{display:block;font-size:27px}.metric span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.notice{padding:16px 18px;border-left:4px solid var(--red)}.panel{margin:12px 0;padding:18px}.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.badges{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.badge{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;letter-spacing:.03em}.badge.native{border-color:#265f36;color:var(--green)}.badge.pass{border-color:#28558a;color:var(--blue)}.badge.review{border-color:#783843;color:var(--red)}details{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}summary{cursor:pointer;font-weight:650}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#090b0f;border:1px solid var(--line);border-radius:7px;padding:13px;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.query{margin:14px 0 0;padding:14px;border-left:2px solid var(--line)}.query.review{border-color:var(--red)}.query.pass{border-color:var(--blue)}.query.native{border-color:var(--green)}.query-title{display:flex;justify-content:space-between;gap:12px}.variables{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}.variable{padding:14px}.glossary,.review-table{width:100%;border-collapse:collapse}.glossary th,.glossary td,.review-table th,.review-table td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:10px}.glossary th,.review-table th{color:var(--muted);font-size:12px;text-transform:uppercase}.glossary code{color:var(--orange);font-size:12px}.hero{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap}.chart{display:flex;align-items:center;gap:20px}.donut{width:158px;height:158px;border-radius:50%;position:relative;flex:none}.donut-center{position:absolute;inset:21px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}.donut-center strong{font-size:31px;letter-spacing:-.02em}.donut-center span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em}.legend{list-style:none;margin:0;padding:0;display:grid;gap:9px}.legend li{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:13px}.legend strong{color:var(--text)}.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}.dot.native{background:var(--green)}.dot.pass{background:var(--blue)}.dot.review{background:var(--red)}.metric{border-top:3px solid var(--line)}.metric.m-green{border-top-color:var(--green)}.metric.m-blue{border-top-color:var(--blue)}.metric.m-red{border-top-color:var(--red)}.metric.m-orange{border-top-color:var(--orange)}.panel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;align-items:start}.panel-grid .panel{margin:0}.panel{border-top:3px solid var(--line)}.panel.native{border-top-color:var(--green)}.panel.pass{border-top-color:var(--blue)}.panel.review{border-top-color:var(--red)}.fidelity{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;flex-wrap:wrap}.meter{flex:1;min-width:90px;height:8px;background:#090b0f;border:1px solid var(--line);border-radius:99px;overflow:hidden}.meter i{display:block;height:100%;border-radius:99px}.meter.good i{background:linear-gradient(90deg,var(--green),#8be09a)}.meter.bad i{background:linear-gradient(90deg,var(--orange),var(--red))}.chartbox{margin:12px 0 4px;background:#090b0f;border:1px solid var(--line);border-radius:7px;padding:10px 12px}.chartbox svg{display:block;width:100%;height:auto}.chart-legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:8px;font-size:11px;color:var(--muted)}.chart-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px}
+.provenance{margin:18px 0}.provenance details{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:12px 16px;margin:8px 0}.glance{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px;margin:22px 0}.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;animation:rise .5s ease both .2s}.card-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:0 0 14px;font-weight:700}.barrow{display:flex;align-items:center;gap:9px;margin:8px 0;font-size:12px}.barlabel{flex:0 0 42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px}.bartrack{flex:1;height:9px;background:#090b0f;border:1px solid var(--line);border-radius:99px;overflow:hidden}.bartrack i{display:block;height:100%;border-radius:99px;transform-origin:left;animation:growbar .9s ease-out both .35s}.bartrack i.native{background:linear-gradient(90deg,var(--green),#8be09a)}.bartrack i.pass{background:linear-gradient(90deg,var(--blue),#9ccbff)}.bartrack i.review{background:linear-gradient(90deg,var(--orange),var(--red))}.barvalue{flex:0 0 auto;min-width:30px;text-align:right;font-variant-numeric:tabular-nums;font-weight:650}.histo{display:flex;align-items:flex-end;gap:8px;height:128px}.hbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}.hbar i{width:100%;background:linear-gradient(180deg,#61a8ff,#28558a);border-radius:4px 4px 0 0;min-height:2px;transform-origin:bottom;animation:growbarv .85s cubic-bezier(.22,.9,.3,1.05) both .35s}.hbar span{font-size:10.5px;color:var(--muted)}.hcount{font-size:10.5px;color:var(--text);font-variant-numeric:tabular-nums}
+@keyframes growbarv{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes sweep{from{opacity:0;transform:rotate(-120deg) scale(.55)}to{opacity:1;transform:none}}
 @keyframes drawline{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
@@ -419,9 +573,6 @@ header{animation:rise .55s ease both}.eyebrow::before{content:"";display:inline-
 <body><main>
 <header><div class="hero"><div><div class="eyebrow">Migration evidence · schema {{.SchemaVersion}}</div><h1>{{.Dashboard.Title}}</h1><div class="muted">{{.Summary.Headline}}</div><div class="path">{{.Dashboard.Source}}</div><div class="muted">{{.Tool.Name}} {{.Tool.Version}} ({{.Tool.Commit}}){{if .Run.Target}} · {{.Run.Target}}{{end}}{{if .Run.StartedAt}} · {{.Run.StartedAt}}{{end}}</div></div>
 {{if .Chart.Total}}<div class="chart" role="img" aria-label="Query verdicts: {{.Chart.Native}} native, {{.Chart.Passthrough}} passthrough, {{.Chart.Review}} needs review"><div class="donut" style="{{.Chart.Style}}"><div class="donut-center"><strong>{{.Chart.NativeRate}}</strong><span>native</span></div></div><ul class="legend"><li><i class="dot native"></i><strong>{{.Chart.Native}}</strong>&nbsp;native (verified)</li><li><i class="dot pass"></i><strong>{{.Chart.Passthrough}}</strong>&nbsp;PromQL passthrough</li><li><i class="dot review"></i><strong>{{.Chart.Review}}</strong>&nbsp;needs review</li></ul></div>{{end}}</div></header>
-{{if .Run.Flags}}<h2>Run outcome</h2><pre>{{json .Run.Flags}}</pre>{{end}}
-{{if .PrimaryArtifact}}<h2>Primary dashboard artifact</h2><pre>{{json .PrimaryArtifact}}</pre>{{end}}
-{{if .Differential}}<h2>Differential run provenance</h2><pre>{{json .Differential}}</pre>{{end}}
 <section class="metrics" aria-label="Migration summary">
 <div class="metric m-orange"><strong>{{.Summary.PanelsAccounted}}/{{.Summary.Panels}}</strong><span>Panels accounted</span></div>
 <div class="metric m-green"><strong>{{.Summary.Builder}}</strong><span>Builder queries</span></div>
@@ -431,6 +582,16 @@ header{animation:rise .55s ease both}.eyebrow::before{content:"";display:inline-
 <div class="metric m-orange"><strong>{{.Summary.PreviewValid}}/{{.Summary.Previewed}}</strong><span>Target previews valid</span></div>
 <div class="metric m-orange"><strong>{{printf "%.1f" .Summary.DataPresentPercent}}%</strong><span>Eligible queries with data</span></div>
 </section>
+<section class="glance" aria-label="Migration at a glance">
+{{if .KindBars}}<article class="card"><h3 class="card-title">Panels by target visualization</h3>{{range .KindBars}}<div class="barrow"><span class="barlabel" title="{{.Label}}">{{.Label}}</span><span class="bartrack"><i class="{{.Class}}" style="width:{{printf "%.1f" .Percent}}%"></i></span><span class="barvalue">{{.Count}}</span></div>{{end}}</article>{{end}}
+{{if .ReasonBars}}<article class="card"><h3 class="card-title">Most frequent reason codes</h3>{{range .ReasonBars}}<div class="barrow"><span class="barlabel" title="{{.Label}}">{{.Label}}</span><span class="bartrack"><i class="{{.Class}}" style="width:{{printf "%.1f" .Percent}}%"></i></span><span class="barvalue">{{.Count}}</span></div>{{end}}</article>{{end}}
+{{if .SeriesHisto}}<article class="card"><h3 class="card-title">Series returned per executed query</h3><div class="histo">{{range .SeriesHisto}}<div class="hbar"><span class="hcount">{{.Count}}</span><i style="height:{{printf "%.1f" .Percent}}%"></i><span>{{.Label}}</span></div>{{end}}</div></article>{{end}}
+</section>
+{{if or .Run.Flags .PrimaryArtifact .Differential}}<section class="provenance" aria-label="Run provenance">
+{{if .Run.Flags}}<details><summary>Run outcome</summary><pre>{{json .Run.Flags}}</pre></details>{{end}}
+{{if .PrimaryArtifact}}<details><summary>Primary dashboard artifact</summary><pre>{{json .PrimaryArtifact}}</pre></details>{{end}}
+{{if .Differential}}<details><summary>Differential run provenance</summary><pre>{{json .Differential}}</pre></details>{{end}}
+</section>{{end}}
 {{if or .Summary.PanelsNeedsReview .Summary.VariablesNeedsReview .Summary.NeedsReview .Summary.SourceFeaturesNeedsReview}}<div class="notice"><strong>Review is required before relying on this dashboard.</strong><div class="muted">The affected dashboard settings, panels, variables, and queries are listed first. Every captured source object and source-only field is reconciled below as an emitted representation, explicit review record, or deliberate omission.</div></div>{{end}}
 {{if .Reviews}}<h2>Needs review</h2><table class="review-table"><thead><tr><th>Panel</th><th>Query</th><th>Reason codes</th><th>Why</th></tr></thead><tbody>{{range .Reviews}}<tr><td>{{.Panel}}</td><td>{{.Query}}</td><td>{{range .ReasonCodes}}<code>{{.}}</code><br>{{end}}</td><td>{{.Explanation}}</td></tr>{{end}}</tbody></table>{{end}}
 {{if .SourceFeatures}}<h2>Dashboard source features</h2><pre>{{json .SourceFeatures}}</pre>{{end}}

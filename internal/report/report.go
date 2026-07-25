@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/mansiverma897993/noz-in/internal/model"
+	"github.com/mansiverma897993/noz-in/internal/target/signoz"
 	"github.com/mansiverma897993/noz-in/internal/version"
 	"github.com/mansiverma897993/noz-in/pkg/reporttypes"
 )
@@ -174,21 +175,18 @@ func reportInventory(dashboard model.Dashboard) model.SourceInventory {
 	return inventory
 }
 
+// emittedPanelKind records the visualization written for a panel. The
+// visualization itself is resolved by the emitter's own mapping so evidence
+// and payload cannot drift; only the states that have no emitted widget at all
+// are decided here.
 func emittedPanelKind(panel model.Panel, mode model.TranslationKind) string {
 	if mode == model.TranslationNone {
 		return "omitted"
 	}
-	if panel.Kind == model.PanelKindBar || panel.Kind == model.PanelKindHistogram {
-		return "graph"
-	}
-	if mode == model.TranslationPromQL &&
-		(panel.Kind == model.PanelKindValue || panel.Kind == model.PanelKindTable || panel.Kind == model.PanelKindPie) {
-		return "graph"
-	}
 	if panel.Kind == model.PanelKindText || panel.Kind == model.PanelKindUnknown {
 		return "EMPTY_WIDGET"
 	}
-	return string(panel.Kind)
+	return signoz.EmittedPanelType(panel.Kind, mode)
 }
 
 func queryRecord(
