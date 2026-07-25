@@ -379,6 +379,16 @@ being counted as equivalent. They are now rejected with
 `BUILDER_TEMPORAL_PHASE_SHIFT`. That is the project's core idea in one line —
 **native is a measurement, not a claim.**
 
+The same discipline decides visualizations. A Grafana stat or gauge panel is
+tempting to emit as a SigNoz value panel, and it looks better in a screenshot —
+but on pinned SigNoz v0.133 a PromQL value panel reduces through a scalar path
+that can surface the window's *oldest* point. Measured on a live target, a
+CPU-busy series running `85.79 … 9.79` displayed **85.79**. A confident wrong
+number is worse than an honest graph, so those panels are emitted as graphs
+with `PANEL_TYPE_DOWNGRADE` and the full series stays visible. The same applies
+to table, pie, bar, and heatmap panels — see
+[docs/compatibility.md](docs/compatibility.md).
+
 ## Evidence
 
 The frozen corpus currently asserts 151 dashboards, 3,186 recursive panels,

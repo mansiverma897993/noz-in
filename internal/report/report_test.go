@@ -70,8 +70,8 @@ func TestEmittedPanelKindMirrorsV5GraphDowngrades(t *testing.T) {
 		{name: "bar", kind: model.PanelKindBar, mode: model.TranslationBuilder, want: "graph"},
 		{name: "histogram", kind: model.PanelKindHistogram, mode: model.TranslationPromQL, want: "graph"},
 		{name: "PromQL table", kind: model.PanelKindTable, mode: model.TranslationPromQL, want: "graph"},
-		{name: "PromQL value", kind: model.PanelKindValue, mode: model.TranslationPromQL, want: "value"},
-		{name: "PromQL pie", kind: model.PanelKindPie, mode: model.TranslationPromQL, want: "pie"},
+		{name: "PromQL value", kind: model.PanelKindValue, mode: model.TranslationPromQL, want: "graph"},
+		{name: "PromQL pie", kind: model.PanelKindPie, mode: model.TranslationPromQL, want: "graph"},
 		{name: "Builder value", kind: model.PanelKindValue, mode: model.TranslationBuilder, want: "value"},
 	}
 	for _, test := range tests {

@@ -383,7 +383,13 @@ func EmittedPanelType(kind model.PanelKind, mode model.TranslationKind) string {
 	if kind == model.PanelKindHistogram || kind == model.PanelKindBar {
 		return "graph"
 	}
-	if mode == model.TranslationPromQL && kind == model.PanelKindTable {
+	// Pinned SigNoz v0.133 reduces a PromQL value/stat response through a
+	// scalar path that can surface the first series' oldest point instead of
+	// Grafana's last value, and table/pie share that reduction. Verified live:
+	// a CPU-busy series returning 85.79 … 9.79 renders as 85.79. A misleading
+	// number is worse than an honest graph, so these stay graphs.
+	if mode == model.TranslationPromQL &&
+		(kind == model.PanelKindValue || kind == model.PanelKindTable || kind == model.PanelKindPie) {
 		return "graph"
 	}
 	return panelType(kind)

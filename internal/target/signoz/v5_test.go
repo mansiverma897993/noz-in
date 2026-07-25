@@ -66,12 +66,14 @@ func TestEmitV5BuilderPanel(t *testing.T) {
 func TestEmitV5PromQLVisualizationMapping(t *testing.T) {
 	t.Parallel()
 
-	// Value and pie panels keep their native SigNoz visualization on the
-	// PromQL path; bar, table, and histogram remain graph-downgraded because
-	// the pinned target renderings are not semantically usable for them.
+	// Every visualization whose pinned SigNoz rendering would be misleading or
+	// blank for a PromQL response is emitted as a graph: value, table, and pie
+	// go through a scalar reduction that can surface the window's oldest point
+	// instead of the current value, and bar/histogram cannot reproduce the
+	// source rendering at all.
 	expected := map[model.PanelKind]string{
-		model.PanelKindValue:     "value",
-		model.PanelKindPie:       "pie",
+		model.PanelKindValue:     "graph",
+		model.PanelKindPie:       "graph",
 		model.PanelKindBar:       "graph",
 		model.PanelKindTable:     "graph",
 		model.PanelKindHistogram: "graph",
